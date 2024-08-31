@@ -13,6 +13,7 @@
             go
             yt-dlp
             ffmpeg
+            sqlitebrowser
           ];
         };
 
