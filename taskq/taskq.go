@@ -11,8 +11,17 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+const (
+	statusQueued = iota
+	statusRunning
+	statusCancelled
+	statusFinished
+	statusError
+)
+
 type Task struct {
 	ID          uuid.UUID
+	Status      int
 	Priority    int
 	Type        string
 	Description string
@@ -35,25 +44,19 @@ var cond = sync.NewCond(new(sync.Mutex))
 func init() {
 	var err error
 	db, err = sql.Open("sqlite3", "file:taskq.db")
+	db.SetMaxOpenConns(1)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	slog.Info("opened sqlite database", "filename", "taskq.db")
 
-	_, err = db.Exec("create table if not exists tasks_queued (id blob primary key, priority integer, type text, description text, payload text)")
+	_, err = db.Exec("create table if not exists tasks (id text primary key, status integer, priority integer, type text, description text, payload text) strict")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	slog.Info("created table tasks_queued")
-
-	_, err = db.Exec("create table if not exists tasks_finished (id blob primary key, type text, description text, payload text)")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	slog.Info("created table tasks_finished")
+	slog.Info("created table tasks")
 
 	handlers = make(map[string]TaskHandler)
 }
@@ -66,6 +69,7 @@ func NewTask(priority int, tasktype, description string, payload string) (*Task,
 
 	return &Task{
 		ID:          uuid,
+		Status:      statusQueued,
 		Priority:    priority,
 		Type:        tasktype,
 		Description: description,
@@ -74,12 +78,13 @@ func NewTask(priority int, tasktype, description string, payload string) (*Task,
 }
 
 func Enqueue(task *Task) error {
-	_, err := db.Exec("insert into tasks_queued (id, priority, type, description, payload) values (?, ?, ?, ?, ?)",
-		task.ID, task.Priority, task.Type, task.Description, task.Payload)
+
+	_, err := db.Exec("insert into tasks (id, status, priority, type, description, payload) values (?, ?, ?, ?, ?, ?)",
+		task.ID, task.Status, task.Priority, task.Type, task.Description, task.Payload)
 
 	if err == nil {
-		slog.Info("task enqueued", "type", task.Type, "description", task.Description)
 		cond.L.Lock()
+		slog.Info("task enqueued", "type", task.Type, "description", task.Description)
 		cond.Signal()
 		cond.L.Unlock()
 	}
@@ -88,10 +93,10 @@ func Enqueue(task *Task) error {
 }
 
 func Dispatch() {
-	row := db.QueryRow("select id, priority, type, description, payload from tasks_queued order by priority desc, id asc limit 1")
+	row := db.QueryRow("select id, status, priority, type, description, payload from tasks where status=? order by priority desc, id asc limit 1", statusQueued)
 
 	var task Task
-	err := row.Scan(&task.ID, &task.Priority, &task.Type, &task.Description, &task.Payload)
+	err := row.Scan(&task.ID, &task.Status, &task.Priority, &task.Type, &task.Description, &task.Payload)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			//wait until enqueue
@@ -108,6 +113,23 @@ func Dispatch() {
 
 	slog.Info("task retrieved", "type", task.Type, "description", task.Description)
 
+	result, err := db.Exec("update tasks set status=? where id=? and status=?", statusRunning, task.ID, statusQueued)
+	if err != nil {
+		slog.Error("task update error", "error", err)
+		return
+	}
+
+	n, err := result.RowsAffected()
+	if err != nil {
+		slog.Error("failed to get rows affected", "error", err)
+		return
+	}
+
+	if n == 0 {
+		slog.Info("failed to acquire task. retrying.")
+		return
+	}
+
 	handler, ok := handlers[task.Type]
 	if !ok {
 		err = fallbackHandler(&task)
@@ -115,35 +137,16 @@ func Dispatch() {
 		err = handler(&task)
 	}
 
+	status := statusFinished
 	if err != nil {
 		slog.Error("task handling error", "type", task.Type, "description", task.Description, "error", err)
-		return
+		status = statusError
 	}
 
-	tx, err := db.Begin()
-	if err != nil {
-		slog.Error("transaction begin error", "error", err)
-	}
-
-	_, err = tx.Exec("insert into tasks_finished (id, type, description, payload) values (?, ?, ?, ?)",
-		task.ID, task.Type, task.Description, task.Payload)
+	_, err = db.Exec("update tasks set status=? where id=?", status, task.ID)
 
 	if err != nil {
-		tx.Rollback()
-		slog.Error("insert error", "error", err)
-		return
-	}
-
-	_, err = tx.Exec("delete from tasks_queued where id=?", task.ID)
-	if err != nil {
-		tx.Rollback()
-		slog.Error("delete error", "error", err)
-		return
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		slog.Error("commit error", "error", err)
+		slog.Error("task update error", "error", err)
 	}
 }
 
