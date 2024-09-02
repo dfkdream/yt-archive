@@ -3,12 +3,10 @@ package taskq
 import (
 	"database/sql"
 	"errors"
-	"log"
 	"log/slog"
 	"sync"
 
 	"github.com/google/uuid"
-	_ "github.com/mattn/go-sqlite3"
 )
 
 const (
@@ -30,35 +28,11 @@ type Task struct {
 
 type TaskHandler func(task *Task) error
 
-var db *sql.DB
-
-var handlers map[string]TaskHandler
-
-var fallbackHandler TaskHandler = func(task *Task) error {
-	slog.Info("ignoring task with no matching handler", "type", task.Type)
-	return nil
-}
-
-var cond = sync.NewCond(new(sync.Mutex))
-
-func init() {
-	var err error
-	db, err = sql.Open("sqlite3", "file:taskq.db")
-	db.SetMaxOpenConns(1)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	slog.Info("opened sqlite database", "filename", "taskq.db")
-
-	_, err = db.Exec("create table if not exists tasks (id text primary key, status integer, priority integer, type text, description text, payload text) strict")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	slog.Info("created table tasks")
-
-	handlers = make(map[string]TaskHandler)
+type Queue struct {
+	db              *sql.DB
+	handlers        map[string]TaskHandler
+	fallbackHandler TaskHandler
+	cond            *sync.Cond
 }
 
 func NewTask(priority int, tasktype, description string, payload string) (*Task, error) {
@@ -77,23 +51,44 @@ func NewTask(priority int, tasktype, description string, payload string) (*Task,
 	}, nil
 }
 
-func Enqueue(task *Task) error {
+func New(DB *sql.DB) (*Queue, error) {
+	_, err := DB.Exec("create table if not exists tasks (id text primary key, status integer, priority integer, type text, description text, payload text) strict")
+	if err != nil {
+		return nil, err
+	}
 
-	_, err := db.Exec("insert into tasks (id, status, priority, type, description, payload) values (?, ?, ?, ?, ?, ?)",
+	slog.Info("created table tasks")
+
+	fallbackHandler := func(task *Task) error {
+		slog.Info("ignoring task with no matching handler", "type", task.Type)
+		return nil
+	}
+
+	return &Queue{
+		db:              DB,
+		handlers:        make(map[string]TaskHandler),
+		fallbackHandler: fallbackHandler,
+		cond:            sync.NewCond(new(sync.Mutex)),
+	}, nil
+}
+
+func (q Queue) Enqueue(task *Task) error {
+
+	_, err := q.db.Exec("insert into tasks (id, status, priority, type, description, payload) values (?, ?, ?, ?, ?, ?)",
 		task.ID, task.Status, task.Priority, task.Type, task.Description, task.Payload)
 
 	if err == nil {
-		cond.L.Lock()
+		q.cond.L.Lock()
 		slog.Info("task enqueued", "type", task.Type, "description", task.Description)
-		cond.Signal()
-		cond.L.Unlock()
+		q.cond.Signal()
+		q.cond.L.Unlock()
 	}
 
 	return err
 }
 
-func Dispatch() {
-	row := db.QueryRow("select id, status, priority, type, description, payload from tasks where status=? order by priority desc, id asc limit 1", statusQueued)
+func (q Queue) Dispatch() {
+	row := q.db.QueryRow("select id, status, priority, type, description, payload from tasks where status=? order by priority desc, id asc limit 1", statusQueued)
 
 	var task Task
 	err := row.Scan(&task.ID, &task.Status, &task.Priority, &task.Type, &task.Description, &task.Payload)
@@ -101,9 +96,9 @@ func Dispatch() {
 		if err == sql.ErrNoRows {
 			//wait until enqueue
 			slog.Info("task queue is empty. waiting for next enqueue")
-			cond.L.Lock()
-			cond.Wait()
-			cond.L.Unlock()
+			q.cond.L.Lock()
+			q.cond.Wait()
+			q.cond.L.Unlock()
 			return
 		} else {
 			slog.Error("task dispatch error", "error", err)
@@ -113,7 +108,7 @@ func Dispatch() {
 
 	slog.Info("task retrieved", "type", task.Type, "description", task.Description)
 
-	result, err := db.Exec("update tasks set status=? where id=? and status=?", statusRunning, task.ID, statusQueued)
+	result, err := q.db.Exec("update tasks set status=? where id=? and status=?", statusRunning, task.ID, statusQueued)
 	if err != nil {
 		slog.Error("task update error", "error", err)
 		return
@@ -130,9 +125,9 @@ func Dispatch() {
 		return
 	}
 
-	handler, ok := handlers[task.Type]
+	handler, ok := q.handlers[task.Type]
 	if !ok {
-		err = fallbackHandler(&task)
+		err = q.fallbackHandler(&task)
 	} else {
 		err = handler(&task)
 	}
@@ -143,25 +138,25 @@ func Dispatch() {
 		status = statusError
 	}
 
-	_, err = db.Exec("update tasks set status=? where id=?", status, task.ID)
+	_, err = q.db.Exec("update tasks set status=? where id=?", status, task.ID)
 
 	if err != nil {
 		slog.Error("task update error", "error", err)
 	}
 }
 
-func Handler(tasktype string, handler TaskHandler) error {
-	if _, ok := handlers[tasktype]; ok {
+func (q *Queue) Handler(tasktype string, handler TaskHandler) error {
+	if _, ok := q.handlers[tasktype]; ok {
 		return errors.New("cannot reuse existing type: " + tasktype)
 	}
 
-	handlers[tasktype] = handler
+	q.handlers[tasktype] = handler
 
 	return nil
 }
 
-func Start() {
+func (q Queue) Start() {
 	for {
-		Dispatch()
+		q.Dispatch()
 	}
 }
