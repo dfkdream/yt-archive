@@ -15,7 +15,7 @@ func DefaultQueue() *Queue {
 		return defaultQueue
 	}
 
-	db, err := sql.Open("sqlite3", "file:taskq.db")
+	db, err := sql.Open("sqlite3", "file:taskq.db?_journal_mode=WAL")
 	db.SetMaxOpenConns(1)
 	if err != nil {
 		log.Fatal(err)
@@ -41,4 +41,14 @@ func Handler(tasktype string, handler TaskHandler) error {
 
 func Start() {
 	DefaultQueue().Start()
+}
+
+func Close() error {
+	if defaultQueue == nil {
+		slog.Info("default task queue is nil")
+		return nil
+	}
+
+	slog.Info("closing database for default task queue")
+	return defaultQueue.db.Close()
 }
