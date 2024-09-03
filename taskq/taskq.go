@@ -146,6 +146,9 @@ func (q Queue) Dispatch() {
 }
 
 func (q *Queue) Handler(tasktype string, handler TaskHandler) error {
+	q.cond.L.Lock()
+	defer q.cond.L.Unlock()
+
 	if _, ok := q.handlers[tasktype]; ok {
 		return errors.New("cannot reuse existing type: " + tasktype)
 	}
