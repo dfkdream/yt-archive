@@ -23,7 +23,7 @@ type Task struct {
 	Priority    int
 	Type        string
 	Description string
-	Payload     string
+	Payload     []byte
 }
 
 type TaskHandler func(task *Task) error
@@ -35,7 +35,7 @@ type Queue struct {
 	cond            *sync.Cond
 }
 
-func NewTask(priority int, tasktype, description string, payload string) (*Task, error) {
+func NewTask(priority int, tasktype, description string, payload []byte) (*Task, error) {
 	uuid, err := uuid.NewV7()
 	if err != nil {
 		return nil, err
@@ -52,7 +52,7 @@ func NewTask(priority int, tasktype, description string, payload string) (*Task,
 }
 
 func New(DB *sql.DB) (*Queue, error) {
-	_, err := DB.Exec("create table if not exists tasks (id text primary key, status integer, priority integer, type text, description text, payload text) strict")
+	_, err := DB.Exec("create table if not exists tasks (id text primary key, status integer, priority integer, type text, description text, payload blob) strict")
 	if err != nil {
 		return nil, err
 	}
