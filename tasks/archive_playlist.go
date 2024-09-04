@@ -18,12 +18,12 @@ type ArchivePlaylistHandler struct {
 }
 
 func NewArchivePlaylistHandler(db *sql.DB) (ArchivePlaylistHandler, error) {
-	_, err := db.Exec("create table if not exists playlists (id text primary key, title text, description text, timestamp timestamp, owner text)")
+	_, err := db.Exec("create table if not exists playlists (id text primary key unique, title text, description text, timestamp timestamp, owner text)")
 	if err != nil {
 		return ArchivePlaylistHandler{}, err
 	}
 
-	_, err = db.Exec("create table if not exists playlist_video (playlistId text, videoId text)")
+	_, err = db.Exec("create table if not exists playlist_video (playlistId text, videoId text, unique (playlistId, videoId), primary key (playlistId, videoId))")
 	if err != nil {
 		return ArchivePlaylistHandler{}, err
 	}
@@ -116,15 +116,19 @@ func (a ArchivePlaylistHandler) Handler(task *taskq.Task) error {
 		return err
 	}
 
-	_, err = tx.Exec("insert into playlists (id, title, description, timestamp, owner) values (?, ?, ?, ?, ?)",
-		metadata.ID, metadata.Title, metadata.Description, timestamp, metadata.Owner)
+	query := `
+	insert into playlists (id, title, description, timestamp, owner) values (?, ?, ?, ?, ?)
+	on conflict(id) do update set timestamp=excluded.timestamp
+	`
+
+	_, err = tx.Exec(query, metadata.ID, metadata.Title, metadata.Description, timestamp, metadata.Owner)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
 
 	for _, videoID := range videos {
-		_, err = tx.Exec("insert into playlist_video (playlistId, videoId) values (?, ?)",
+		_, err = tx.Exec("insert into playlist_video (playlistId, videoId) values (?, ?) on conflict(playlistId, videoId) do nothing",
 			playlistID, videoID)
 		if err != nil {
 			tx.Rollback()
