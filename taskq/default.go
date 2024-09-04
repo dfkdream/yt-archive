@@ -10,6 +10,10 @@ import (
 
 var defaultQueue *Queue
 
+func SetDefaultQueue(q *Queue) {
+	defaultQueue = q
+}
+
 func DefaultQueue() *Queue {
 	if defaultQueue != nil {
 		return defaultQueue
