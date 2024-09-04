@@ -16,8 +16,17 @@ import (
 
 const TASK_ARCHIVE_VIDEO = "ARCHIVE_VIDEO"
 
-type ArchiveVideo struct {
+type ArchiveVideoHandler struct {
 	DB *sql.DB
+}
+
+func NewArchiveVideoHandler(db *sql.DB) (ArchiveVideoHandler, error) {
+	_, err := db.Exec("create table if not exists videos (id text primary key, title text, description text, timestamp timestamp, duration text, owner text, thumbnail text)")
+	if err != nil {
+		return ArchiveVideoHandler{}, err
+	}
+
+	return ArchiveVideoHandler{DB: db}, nil
 }
 
 type format struct {
@@ -40,7 +49,7 @@ type videoMetadata struct {
 	Formats     []format `json:"formats"`
 }
 
-func (a ArchiveVideo) Handler(task *taskq.Task) error {
+func (a ArchiveVideoHandler) Handler(task *taskq.Task) error {
 	var videoID string
 	err := json.Unmarshal(task.Payload, &videoID)
 	if err != nil {
