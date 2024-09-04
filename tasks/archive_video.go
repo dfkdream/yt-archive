@@ -47,6 +47,18 @@ func (a ArchiveVideo) Handler(task *taskq.Task) error {
 		return err
 	}
 
+	r := a.DB.QueryRow("select count(id) from videos where id=?", videoID)
+	var n int
+	err = r.Scan(&n)
+	if err != nil {
+		return err
+	}
+
+	if n > 0 {
+		slog.Info("skipping duplicated video", "id", videoID)
+		return nil
+	}
+
 	tempDir, err := os.MkdirTemp("", videoID+"_*")
 	if err != nil {
 		return err
