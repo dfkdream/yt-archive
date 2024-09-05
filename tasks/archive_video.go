@@ -103,6 +103,18 @@ func (a ArchiveVideoHandler) Handler(task *taskq.Task) error {
 		return err
 	}
 
+	bytePayload, err := json.Marshal(metadata.Owner)
+	if err != nil {
+		return err
+	}
+
+	t, err := taskq.NewTask(50, TASK_ARCHIVE_CHANNEL_INFO, videoID+"_"+metadata.Owner, bytePayload)
+	if err != nil {
+		return err
+	}
+
+	taskq.Enqueue(t)
+
 	formats := selectVideoFormats(metadata.Formats)
 
 	downloadMediaPayload := DownloadMediaPayload{
@@ -111,12 +123,12 @@ func (a ArchiveVideoHandler) Handler(task *taskq.Task) error {
 		OutputPath: filepath.Join(destPath, videoID+AUDIO_FILE_SUFFIX),
 	}
 
-	bytePayload, err := json.Marshal(downloadMediaPayload)
+	bytePayload, err = json.Marshal(downloadMediaPayload)
 	if err != nil {
 		return err
 	}
 
-	t, err := taskq.NewTask(50, TASK_DOWNLOAD_MEDIA, videoID+"_bestaudio", bytePayload)
+	t, err = taskq.NewTask(50, TASK_DOWNLOAD_MEDIA, videoID+"_bestaudio", bytePayload)
 	if err != nil {
 		return err
 	}
