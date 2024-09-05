@@ -105,39 +105,39 @@ func (a ArchiveVideoHandler) Handler(task *taskq.Task) error {
 
 	formats := selectVideoFormats(metadata.Formats)
 
-	p := DownloadMediaPayload{
+	downloadMediaPayload := DownloadMediaPayload{
 		VideoID:    videoID,
 		Format:     "bestaudio",
 		OutputPath: filepath.Join(destPath, videoID+AUDIO_FILE_SUFFIX),
 	}
 
-	b, err := json.Marshal(p)
+	bytePayload, err := json.Marshal(downloadMediaPayload)
 	if err != nil {
 		return err
 	}
 
-	j, err := taskq.NewTask(50, TASK_DOWNLOAD_MEDIA, videoID+"_bestaudio", b)
+	t, err := taskq.NewTask(50, TASK_DOWNLOAD_MEDIA, videoID+"_bestaudio", bytePayload)
 	if err != nil {
 		return err
 	}
 
-	taskq.Enqueue(j)
+	taskq.Enqueue(t)
 
 	for _, v := range formats {
-		p.Format = v.FormatID
-		p.OutputPath = filepath.Join(destPath, videoID+"_"+strconv.Itoa(v.Height)+MEDIA_FILE_SUFFIX)
+		downloadMediaPayload.Format = v.FormatID
+		downloadMediaPayload.OutputPath = filepath.Join(destPath, videoID+"_"+strconv.Itoa(v.Height)+MEDIA_FILE_SUFFIX)
 
-		b, err = json.Marshal(p)
+		bytePayload, err = json.Marshal(downloadMediaPayload)
 		if err != nil {
 			return err
 		}
 
-		j, err = taskq.NewTask(10, TASK_DOWNLOAD_MEDIA, videoID+"_"+strconv.Itoa(v.Height), b)
+		t, err = taskq.NewTask(10, TASK_DOWNLOAD_MEDIA, videoID+"_"+strconv.Itoa(v.Height), bytePayload)
 		if err != nil {
 			return err
 		}
 
-		taskq.Enqueue(j)
+		taskq.Enqueue(t)
 	}
 
 	return nil
