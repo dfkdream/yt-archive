@@ -95,7 +95,7 @@ func (a ArchivePlaylistHandler) Handler(task *taskq.Task) error {
 	}
 
 	for _, videoID := range videos {
-		task, err := taskq.NewJsonTask(50, TASK_ARCHIVE_VIDEO, playlistID+" - "+videoID, videoID)
+		task, err := taskq.NewJsonTask(PRIORITY_ARCHIVE_VIDEO, TASK_ARCHIVE_VIDEO, playlistID+" - "+videoID, videoID)
 		if err != nil {
 			return err
 		}
