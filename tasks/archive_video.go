@@ -14,7 +14,7 @@ import (
 	"yt-archive/taskq"
 )
 
-const TASK_ARCHIVE_VIDEO = "ARCHIVE_VIDEO"
+const TaskTypeArchiveVideo = "ARCHIVE_VIDEO"
 
 type ArchiveVideoHandler struct {
 	DB *sql.DB
@@ -103,7 +103,7 @@ func (a ArchiveVideoHandler) Handler(task *taskq.Task) error {
 		return err
 	}
 
-	t, err := taskq.NewJsonTask(PRIORITY_ARCHVIE_CHANNEL_INFO, TASK_ARCHIVE_CHANNEL_INFO, videoID+"_"+metadata.Owner, metadata.Owner)
+	t, err := taskq.NewJsonTask(PriorityArchiveChannelInfo, TaskTypeArchiveChannelInfo, videoID+"_"+metadata.Owner, metadata.Owner)
 	if err != nil {
 		return err
 	}
@@ -118,7 +118,7 @@ func (a ArchiveVideoHandler) Handler(task *taskq.Task) error {
 		OutputPath: filepath.Join(destPath, videoID+AUDIO_FILE_SUFFIX),
 	}
 
-	t, err = taskq.NewJsonTask(PRIORITY_DOWNLOAD_AUDIO, TASK_DOWNLOAD_MEDIA, videoID+"_bestaudio", downloadMediaPayload)
+	t, err = taskq.NewJsonTask(PriorityDownloadAudio, TaskTypeDownloadMedia, videoID+"_bestaudio", downloadMediaPayload)
 	if err != nil {
 		return err
 	}
@@ -129,7 +129,7 @@ func (a ArchiveVideoHandler) Handler(task *taskq.Task) error {
 		downloadMediaPayload.Format = v.FormatID
 		downloadMediaPayload.OutputPath = filepath.Join(destPath, videoID+"_"+strconv.Itoa(v.Height)+MEDIA_FILE_SUFFIX)
 
-		t, err = taskq.NewJsonTask(calculateVideoPriority(v), TASK_DOWNLOAD_MEDIA, videoID+"_"+strconv.Itoa(v.Height), downloadMediaPayload)
+		t, err = taskq.NewJsonTask(calculateVideoPriority(v), TaskTypeDownloadMedia, videoID+"_"+strconv.Itoa(v.Height), downloadMediaPayload)
 		if err != nil {
 			return err
 		}

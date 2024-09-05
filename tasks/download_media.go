@@ -11,7 +11,7 @@ import (
 	"yt-archive/taskq"
 )
 
-const TASK_DOWNLOAD_MEDIA = "DOWNLOAD_MEDIA"
+const TaskTypeDownloadMedia = "DOWNLOAD_MEDIA"
 
 const (
 	MEDIA_FILE_SUFFIX = ".webm"

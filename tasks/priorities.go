@@ -1,24 +1,24 @@
 package tasks
 
 const (
-	PRIORITY_GAP = 20
+	priorityGap = 20
 )
 
 const (
-	PRIORITY_LOWEST = iota * PRIORITY_GAP
-	PRIORITY_DOWNLOAD_VIDEO
-	PRIORITY_DOWNLOAD_AUDIO
-	PRIORITY_ARCHIVE_PLAYLIST
-	PRIORITY_ARCHIVE_VIDEO
-	PRIORITY_ARCHVIE_CHANNEL_INFO
-	PRIORITY_HIGHEST
+	PriorityLowest = iota * priorityGap
+	PriorityDownloadVideo
+	PriorityDownloadAudio
+	PriorityArchivePlaylist
+	PriorityArchiveVideo
+	PriorityArchiveChannelInfo
+	PriorityHighest
 )
 
 func calculateVideoPriority(f format) int {
-	priority := PRIORITY_DOWNLOAD_VIDEO
+	priority := PriorityDownloadVideo
 
 	if f.VideoExt == "webm" {
-		priority += PRIORITY_GAP / 2
+		priority += priorityGap / 2
 	}
 
 	pixels := f.Width * f.Height

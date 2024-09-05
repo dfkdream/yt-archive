@@ -10,7 +10,7 @@ import (
 	"yt-archive/taskq"
 )
 
-const TASK_ARCHIVE_CHANNEL_INFO = "ARCHIVE_CHANNEL_INFO"
+const TaskTypeArchiveChannelInfo = "ARCHIVE_CHANNEL_INFO"
 
 type ArchiveChannelInfoHandler struct {
 	DB *sql.DB

@@ -11,7 +11,7 @@ import (
 	"yt-archive/taskq"
 )
 
-const TASK_ARCHIVE_PLAYLIST = "ARCHIVE_PLAYLIST"
+const TaskTypeArchivePlaylist = "ARCHIVE_PLAYLIST"
 
 type ArchivePlaylistHandler struct {
 	DB *sql.DB
@@ -95,7 +95,7 @@ func (a ArchivePlaylistHandler) Handler(task *taskq.Task) error {
 	}
 
 	for _, videoID := range videos {
-		task, err := taskq.NewJsonTask(PRIORITY_ARCHIVE_VIDEO, TASK_ARCHIVE_VIDEO, playlistID+" - "+videoID, videoID)
+		task, err := taskq.NewJsonTask(PriorityArchiveVideo, TaskTypeArchiveVideo, playlistID+" - "+videoID, videoID)
 		if err != nil {
 			return err
 		}
