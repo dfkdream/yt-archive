@@ -2,6 +2,7 @@ package taskq
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"log/slog"
 	"sync"
@@ -49,6 +50,15 @@ func NewTask(priority int, tasktype, description string, payload []byte) (*Task,
 		Description: description,
 		Payload:     payload,
 	}, nil
+}
+
+func NewJsonTask(priority int, tasktype, description string, payload any) (*Task, error) {
+	bytePayload, err := json.Marshal(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(priority, tasktype, description, bytePayload)
 }
 
 func New(DB *sql.DB) (*Queue, error) {

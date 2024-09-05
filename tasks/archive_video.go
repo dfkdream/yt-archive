@@ -103,12 +103,7 @@ func (a ArchiveVideoHandler) Handler(task *taskq.Task) error {
 		return err
 	}
 
-	bytePayload, err := json.Marshal(metadata.Owner)
-	if err != nil {
-		return err
-	}
-
-	t, err := taskq.NewTask(50, TASK_ARCHIVE_CHANNEL_INFO, videoID+"_"+metadata.Owner, bytePayload)
+	t, err := taskq.NewJsonTask(50, TASK_ARCHIVE_CHANNEL_INFO, videoID+"_"+metadata.Owner, metadata.Owner)
 	if err != nil {
 		return err
 	}
@@ -123,12 +118,7 @@ func (a ArchiveVideoHandler) Handler(task *taskq.Task) error {
 		OutputPath: filepath.Join(destPath, videoID+AUDIO_FILE_SUFFIX),
 	}
 
-	bytePayload, err = json.Marshal(downloadMediaPayload)
-	if err != nil {
-		return err
-	}
-
-	t, err = taskq.NewTask(50, TASK_DOWNLOAD_MEDIA, videoID+"_bestaudio", bytePayload)
+	t, err = taskq.NewJsonTask(50, TASK_DOWNLOAD_MEDIA, videoID+"_bestaudio", downloadMediaPayload)
 	if err != nil {
 		return err
 	}
@@ -139,12 +129,7 @@ func (a ArchiveVideoHandler) Handler(task *taskq.Task) error {
 		downloadMediaPayload.Format = v.FormatID
 		downloadMediaPayload.OutputPath = filepath.Join(destPath, videoID+"_"+strconv.Itoa(v.Height)+MEDIA_FILE_SUFFIX)
 
-		bytePayload, err = json.Marshal(downloadMediaPayload)
-		if err != nil {
-			return err
-		}
-
-		t, err = taskq.NewTask(10, TASK_DOWNLOAD_MEDIA, videoID+"_"+strconv.Itoa(v.Height), bytePayload)
+		t, err = taskq.NewJsonTask(10, TASK_DOWNLOAD_MEDIA, videoID+"_"+strconv.Itoa(v.Height), downloadMediaPayload)
 		if err != nil {
 			return err
 		}
