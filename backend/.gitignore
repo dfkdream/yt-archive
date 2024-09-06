@@ -1,0 +1,8 @@
+channels
+thumbnails
+videos
+json
+yt-archive
+*.db*
+*.webm
+*.mpd

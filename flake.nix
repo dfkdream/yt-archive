@@ -10,10 +10,14 @@
       {
         devShell = pkgs.mkShell {
           buildInputs = with pkgs; [
+            #backend
             go
             yt-dlp
             ffmpeg
             sqlitebrowser
+
+            #frontend
+            nodejs
           ];
         };
 
