@@ -23,5 +23,8 @@ func (f *FileServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	slog.Error("FileServer error", "msg", err)
+	if err != nil {
+		slog.Error("FileServer error", "msg", err)
+		writeError(w, http.StatusInternalServerError)
+	}
 }
