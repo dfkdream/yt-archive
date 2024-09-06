@@ -9,80 +9,68 @@ import (
 )
 
 type StaticSiteServer struct {
-	FS http.FileSystem
+	FS       http.FileSystem
+	Fallback string
 }
 
 func (s *StaticSiteServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := filepath.Clean(r.URL.Path)
-	slog.Info("sss request", "path", path)
+	slog.Info("StaticSiteServer request", "path", path)
 
-	f, err := s.FS.Open(path)
-	if err != nil {
-		if errors.Is(err, fs.ErrNotExist) {
-			f, err = findIndex(s.FS, path)
-			if err != nil {
-				slog.Error("StaticSiteServer Open findIndex", "error", err)
-				writeError(w, http.StatusInternalServerError)
-				return
-			}
-		} else {
-			slog.Error("StaticSiteServer Open", "error", err)
-			writeError(w, http.StatusInternalServerError)
-			return
-		}
-	}
+	isdir, err := serveFile(w, r, s.FS, path)
 
-	stat, err := f.Stat()
-	if err != nil {
-		slog.Error("StaticSiteServer Stat", "error", err)
+	if errors.Is(err, fs.ErrNotExist) {
+		s.serveFallback(w, r)
+		return
+	} else if err != nil {
+		slog.Error("StaticSiteServer error", "msg", err)
 		writeError(w, http.StatusInternalServerError)
 		return
 	}
 
+	if isdir {
+		s.serveIndex(w, r, path)
+	}
+}
+
+func (s StaticSiteServer) serveIndex(w http.ResponseWriter, r *http.Request, path string) {
+	_, err := serveFile(w, r, s.FS, filepath.Join(path, "index.html"))
+	if errors.Is(err, fs.ErrNotExist) {
+		s.serveFallback(w, r)
+	} else if err != nil {
+		slog.Error("serveIndex error", "msg", err)
+		writeError(w, http.StatusInternalServerError)
+	}
+}
+
+func (s StaticSiteServer) serveFallback(w http.ResponseWriter, r *http.Request) {
+	_, err := serveFile(w, r, s.FS, s.Fallback)
+	if err != nil {
+		slog.Error("serveFallback error", "msg", err)
+		writeError(w, http.StatusInternalServerError)
+	}
+}
+
+func serveFile(w http.ResponseWriter, r *http.Request, FS http.FileSystem, path string) (bool, error) {
+	f, err := FS.Open(path)
+	if err != nil {
+		return false, err
+	}
+
+	stat, err := f.Stat()
+	if err != nil {
+		return false, err
+	}
+
 	if stat.IsDir() {
-		f.Close()
-		f, err = findIndex(s.FS, path)
-		if err != nil {
-			slog.Error("StaticSiteServer findIndex", "error", err)
-			writeError(w, http.StatusInternalServerError)
-			return
-		}
+		return true, nil
 	}
 
 	http.ServeContent(w, r, stat.Name(), stat.ModTime(), f)
+	return false, nil
 }
 
 func writeError(w http.ResponseWriter, code int) {
 	w.WriteHeader(code)
 	w.Write([]byte(http.StatusText(code)))
-}
-
-const indexFile = "index.html"
-
-func findIndex(targetFs http.FileSystem, path string) (http.File, error) {
-	path = filepath.Clean(path)
-
-	slog.Info("findIndex", "path", path)
-
-	f, err := targetFs.Open(filepath.Join(path, indexFile))
-	if err == nil {
-		stat, err := f.Stat()
-		if err != nil {
-			return nil, err
-		}
-
-		if !stat.IsDir() {
-			return f, nil
-		}
-	}
-
-	if !errors.Is(err, fs.ErrNotExist) {
-		return nil, err
-	}
-
-	if path == "/" {
-		return nil, fs.ErrNotExist
-	}
-
-	return findIndex(targetFs, filepath.Join(path, ".."))
 }

@@ -9,7 +9,8 @@ func New() *http.ServeMux {
 	mux := http.NewServeMux()
 
 	mux.Handle("/", &StaticSiteServer{
-		FS: http.FS(os.DirFS("dist")),
+		FS:       http.FS(os.DirFS("dist")),
+		Fallback: "fallback.html",
 	})
 
 	mux.Handle("/api/videos/", http.StripPrefix("/api/videos", &FileServer{
