@@ -39,6 +39,19 @@ func New(db *sql.DB) http.Handler {
 			FS: http.FS(os.DirFS("channels")),
 		}))
 
+	r.Path("/api/tasks").
+		Methods(http.MethodGet).
+		Handler(tasksHandler{DB: db})
+
+	r.Path("/api/tasks").
+		Methods(http.MethodPost).
+		Headers("Content-Type", "application/json").
+		HandlerFunc(enqueTaskHandler)
+
+	r.Path("/api/tasks/{id}").
+		Methods(http.MethodGet).
+		Handler(taskHandler{DB: db})
+
 	r.PathPrefix("/").
 		Methods(http.MethodGet).
 		Handler(&StaticSiteServer{
