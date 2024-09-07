@@ -1,8 +1,3 @@
-channels
-thumbnails
-videos
-json
+/channels
+/videos
 yt-archive
-*.db*
-*.webm
-*.mpd

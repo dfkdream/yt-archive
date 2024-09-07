@@ -1,5 +1,10 @@
-dist
-yt-archive
+# Build files
+/dist
+/yt-archive
+
+# Runtime-generated files
+/channels
+/videos
 *.db*
-channels
-videos
+*.webm
+*.mpd
