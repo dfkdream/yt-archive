@@ -25,6 +25,14 @@ func New(db *sql.DB) http.Handler {
 			FS: http.FS(os.DirFS("videos")),
 		}))
 
+	r.Path("/api/channels").
+		Methods(http.MethodGet).
+		Handler(channelsHandler{DB: db})
+
+	r.Path("/api/channels/{id}").
+		Methods(http.MethodGet).
+		Handler(channelVideosHandler{DB: db})
+
 	r.PathPrefix("/api/channels/").
 		Methods(http.MethodGet).
 		Handler(http.StripPrefix("/api/channels/", &FileServer{
