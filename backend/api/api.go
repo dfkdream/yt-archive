@@ -39,6 +39,14 @@ func New(db *sql.DB) http.Handler {
 			FS: http.FS(os.DirFS("channels")),
 		}))
 
+	r.Path("/api/playlists").
+		Methods(http.MethodGet).
+		Handler(playlistsHandler{DB: db})
+
+	r.Path("/api/playlists/{id}").
+		Methods(http.MethodGet).
+		Handler(playlistVideosHandler{DB: db})
+
 	r.Path("/api/tasks").
 		Methods(http.MethodGet).
 		Handler(tasksHandler{DB: db})
