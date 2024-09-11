@@ -13,7 +13,12 @@ import (
 )
 
 func main() {
-	db, err := sql.Open("sqlite3", "file:yt-archive.db?_journal_mode=WAL&_txlock=immediate")
+	err := os.MkdirAll("database", os.FileMode(0o700))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	db, err := sql.Open("sqlite3", "file:database/yt-archive.db?_journal_mode=WAL&_txlock=immediate")
 	if err != nil {
 		log.Fatal(err)
 	}
