@@ -205,7 +205,7 @@ func calculateFormatPreference(f format) int {
 	}
 
 	if canSkipEncoding(f) {
-		preference++
+		preference += 2
 	}
 
 	if f.FPS > 30 {
@@ -223,7 +223,9 @@ func canSkipEncoding(f format) bool {
 
 	if strings.HasPrefix(f.VideoCodec, "av01") {
 		// AV1
-		return true
+		// AV1 in WebM is currently not working on iOS devices
+		// return true
+		return false
 	}
 
 	return false
