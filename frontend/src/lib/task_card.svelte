@@ -3,6 +3,10 @@
     import type { Task } from "./api/tasks";
 
     export let task: Task;
+
+    function formatPayload(payload: string){
+        return JSON.stringify(JSON.parse(atob(payload)), null, 2);
+    }
 </script>
 
 <Block strong inset id={task.ID}>
@@ -14,6 +18,6 @@
     <p class="my-1">{task.Description}</p>
     <details class="mt-1">
         <summary>Show Payload</summary>
-        <pre class="overflow-x-scroll">{task.Payload}</pre>
+        <pre class="overflow-x-scroll">{formatPayload(task.Payload)}</pre>
     </details>
 </Block>
