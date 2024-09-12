@@ -27,6 +27,8 @@ func (c channelsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	defer rows.Close()
+
 	result := make([]Channel, 0)
 	var channel Channel
 	for rows.Next() {
@@ -70,6 +72,8 @@ func (c channelVideosHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		writeError(w, http.StatusInternalServerError)
 		return
 	}
+
+	defer rows.Close()
 
 	var channelVideos ChannelVideos
 	for rows.Next() {

@@ -40,6 +40,8 @@ func (v videosHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	defer rows.Close()
+
 	result := make([]Video, 0)
 	var video Video
 	for rows.Next() {

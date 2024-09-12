@@ -25,6 +25,8 @@ func (t tasksHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	defer rows.Close()
+
 	result := make([]taskq.Task, 0)
 	var task taskq.Task
 	for rows.Next() {

@@ -34,6 +34,8 @@ func (p playlistsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	on p.id=pv.playlistId
 	left join videos as v
 	on pv.videoId=v.id	
+	where c.thumbnail not null
+	and v.id not null
 	`
 
 	rows, err := p.DB.Query(query)
@@ -42,6 +44,8 @@ func (p playlistsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError)
 		return
 	}
+
+	defer rows.Close()
 
 	result := make([]Playlist, 0)
 	var playlist Playlist
@@ -99,6 +103,8 @@ func (p playlistVideosHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 		writeError(w, http.StatusInternalServerError)
 		return
 	}
+
+	defer rows.Close()
 
 	var playlistVideos PlaylistVideos
 	for rows.Next() {
