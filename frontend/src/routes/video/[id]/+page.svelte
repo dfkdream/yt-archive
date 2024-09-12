@@ -46,7 +46,7 @@
     {/if}
 </svelte:head>
 
-<DashVideo {manifest} {poster} controls playsinline autoplay 
+<DashVideo {manifest} {poster} controls playsinline 
 class="m-auto w-full sticky top-0 z-50" bind:videoQuality bind:videoBitrateList
 bind:bufferLength />
 
