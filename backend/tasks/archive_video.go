@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"os"
@@ -30,13 +31,16 @@ func NewArchiveVideoHandler(db *sql.DB) (ArchiveVideoHandler, error) {
 }
 
 type format struct {
-	FormatID string  `json:"format_id"`
-	VideoExt string  `json:"video_ext"`
-	Width    int     `json:"width"`
-	Height   int     `json:"height"`
-	VBR      float32 `json:"vbr"`
-	Protocol string  `json:"protocol"`
-	Name     string  `json:"format"`
+	FormatID   string  `json:"format_id"`
+	VideoExt   string  `json:"video_ext"`
+	VideoCodec string  `json:"vcodec"`
+	AudioCodec string  `json:"acodec"`
+	FPS        float32 `json:"fps"`
+	Width      int     `json:"width"`
+	Height     int     `json:"height"`
+	VBR        float32 `json:"vbr"`
+	Protocol   string  `json:"protocol"`
+	Name       string  `json:"format"`
 }
 
 type videoMetadata struct {
@@ -129,7 +133,12 @@ func (a ArchiveVideoHandler) Handler(task *taskq.Task) error {
 		downloadMediaPayload.Format = v.FormatID
 		downloadMediaPayload.OutputPath = filepath.Join(destPath, videoID+"_"+strconv.Itoa(v.Height)+MEDIA_FILE_SUFFIX)
 
-		t, err = taskq.NewJsonTask(calculateVideoPriority(v), TaskTypeDownloadMedia, videoID+"_"+strconv.Itoa(v.Height), downloadMediaPayload)
+		description := fmt.Sprintf("%s, %d", videoID, v.Height)
+		if isEncodingRequired(v) {
+			description += " (Encoding required)"
+		}
+
+		t, err = taskq.NewJsonTask(calculateVideoPriority(v), TaskTypeDownloadMedia, description, downloadMediaPayload)
 		if err != nil {
 			return err
 		}
@@ -143,7 +152,7 @@ func (a ArchiveVideoHandler) Handler(task *taskq.Task) error {
 func selectVideoFormats(formats []format) []format {
 	/*
 		Format preference:
-		webm - Other
+		webm (vp09, av01) - Other
 
 		Protocol preference:
 		https - Other
@@ -154,40 +163,68 @@ func selectVideoFormats(formats []format) []format {
 
 	result := make([]format, 0)
 
-	hasWebmVideo := false
-	dashAvailable := false
+	resolutionFormat := make(map[string]format)
 
 	for _, f := range formats {
-		if f.VideoExt == "webm" {
-			hasWebmVideo = true
-		}
-
-		if f.VideoExt != "none" && f.Protocol == "https" {
-			dashAvailable = true
-		}
-	}
-
-	for _, f := range formats {
-		if f.VideoExt == "none" {
+		if f.VideoCodec == "none" {
 			continue
 		}
 
-		if hasWebmVideo {
-			if f.VideoExt != "webm" {
-				continue
-			}
+		if f.AudioCodec != "none" {
+			// skip muxed files
+			continue
 		}
 
-		if dashAvailable {
-			if f.Protocol != "https" {
-				continue
-			}
+		resolutionString := fmt.Sprintf("%dx%d", f.Width, f.Height)
+		prev, ok := resolutionFormat[resolutionString]
+		if !ok {
+			resolutionFormat[resolutionString] = f
+			continue
 		}
 
-		result = append(result, f)
+		if calculateFormatPreference(f) > calculateFormatPreference(prev) {
+			resolutionFormat[resolutionString] = f
+		}
+	}
+
+	for _, v := range resolutionFormat {
+		result = append(result, v)
 	}
 
 	return result
+}
+
+func calculateFormatPreference(f format) int {
+	preference := 0
+
+	if f.Protocol == "https" {
+		// DASH
+		preference++
+	}
+
+	if isEncodingRequired(f) {
+		preference++
+	}
+
+	if f.FPS > 30 {
+		preference++
+	}
+
+	return preference
+}
+
+func isEncodingRequired(f format) bool {
+	if strings.HasPrefix(f.VideoCodec, "vp") {
+		// VP8 or VP9
+		return false
+	}
+
+	if strings.HasPrefix(f.VideoCodec, "av01") {
+		// AV1
+		return false
+	}
+
+	return true
 }
 
 func parseVideoMetadata(path string) (*videoMetadata, error) {
