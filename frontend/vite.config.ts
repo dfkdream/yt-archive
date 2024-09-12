@@ -3,6 +3,11 @@ import { defineConfig } from 'vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 
 export default defineConfig({
+	server: {
+		proxy: {
+			'^/api/.*': 'http://localhost:8080'
+		}
+	},
 	plugins: [
 		sveltekit(),
 		SvelteKitPWA({

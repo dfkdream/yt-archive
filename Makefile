@@ -15,6 +15,10 @@ yt-archive: $(BACKEND_FILES)
 start: all
 	./yt-archive
 
+dev: yt-archive
+	YT_ARCHIVE_ADDR=localhost:8080 ./yt-archive &
+	(cd frontend && npm run dev)
+
 clean:
 	rm yt-archive
 	rm -r dist
