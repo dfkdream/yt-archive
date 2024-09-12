@@ -117,9 +117,10 @@ func (a ArchiveVideoHandler) Handler(task *taskq.Task) error {
 	formats := selectVideoFormats(metadata.Formats)
 
 	downloadMediaPayload := DownloadMediaPayload{
-		VideoID:    videoID,
-		Format:     "bestaudio",
-		OutputPath: filepath.Join(destPath, videoID+AUDIO_FILE_SUFFIX),
+		VideoID:      videoID,
+		Format:       "bestaudio",
+		OutputPath:   filepath.Join(destPath, videoID+AUDIO_FILE_SUFFIX),
+		SkipEncoding: false,
 	}
 
 	t, err = taskq.NewJsonTask(PriorityDownloadAudio, TaskTypeDownloadMedia, videoID+"_bestaudio", downloadMediaPayload)
@@ -132,9 +133,10 @@ func (a ArchiveVideoHandler) Handler(task *taskq.Task) error {
 	for _, v := range formats {
 		downloadMediaPayload.Format = v.FormatID
 		downloadMediaPayload.OutputPath = filepath.Join(destPath, videoID+"_"+strconv.Itoa(v.Height)+MEDIA_FILE_SUFFIX)
+		downloadMediaPayload.SkipEncoding = canSkipEncoding(v)
 
-		description := fmt.Sprintf("%s, %d", videoID, v.Height)
-		if isEncodingRequired(v) {
+		description := fmt.Sprintf("%s, %d, %s", videoID, v.Height, v.VideoCodec)
+		if !downloadMediaPayload.SkipEncoding {
 			description += " (Encoding required)"
 		}
 
@@ -202,7 +204,7 @@ func calculateFormatPreference(f format) int {
 		preference++
 	}
 
-	if isEncodingRequired(f) {
+	if canSkipEncoding(f) {
 		preference++
 	}
 
@@ -213,18 +215,18 @@ func calculateFormatPreference(f format) int {
 	return preference
 }
 
-func isEncodingRequired(f format) bool {
+func canSkipEncoding(f format) bool {
 	if strings.HasPrefix(f.VideoCodec, "vp") {
 		// VP8 or VP9
-		return false
+		return true
 	}
 
 	if strings.HasPrefix(f.VideoCodec, "av01") {
 		// AV1
-		return false
+		return true
 	}
 
-	return true
+	return false
 }
 
 func parseVideoMetadata(path string) (*videoMetadata, error) {

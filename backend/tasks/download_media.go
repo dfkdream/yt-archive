@@ -19,9 +19,10 @@ const (
 )
 
 type DownloadMediaPayload struct {
-	VideoID    string
-	Format     string
-	OutputPath string
+	VideoID      string
+	Format       string
+	OutputPath   string
+	SkipEncoding bool
 }
 
 func DownloadMediaHandler(task *taskq.Task) error {
@@ -54,8 +55,8 @@ func DownloadMediaHandler(task *taskq.Task) error {
 	filename := files[0].Name()
 	slog.Info("download completed", "filename", filename)
 
-	if filepath.Ext(filename) == ".webm" {
-		err = Exec("ffmpeg", "-i", filepath.Join(tempDir, filename), "-keyint_min", "150", "-g", "150", "-tile-columns", "4", "-frame-parallel", "1", "-f", "webm", "-c", "copy", "-dash", "1", payload.OutputPath)
+	if (payload.Format == "bestaudio" && filepath.Ext(filename) == ".webm") || payload.SkipEncoding {
+		err = Exec("ffmpeg", "-i", filepath.Join(tempDir, filename), "-f", "webm", "-c", "copy", "-dash", "1", payload.OutputPath)
 	} else {
 		err = Exec("ffmpeg", "-i", filepath.Join(tempDir, filename), "-keyint_min", "150", "-g", "150", "-tile-columns", "4", "-frame-parallel", "1", "-f", "webm", "-dash", "1", payload.OutputPath)
 	}
