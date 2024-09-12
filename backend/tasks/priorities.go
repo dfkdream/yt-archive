@@ -17,7 +17,7 @@ const (
 func calculateVideoPriority(f format) int {
 	priority := PriorityDownloadVideo
 
-	if f.VideoExt == "webm" {
+	if canSkipEncoding(f) {
 		priority += priorityGap / 2
 	}
 
