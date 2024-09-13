@@ -16,8 +16,9 @@ start: all
 	./yt-archive
 
 dev: yt-archive
-	YT_ARCHIVE_ADDR=localhost:8080 ./yt-archive &
-	(cd frontend && npm run dev)
+	YT_ARCHIVE_ADDR=localhost:8080 ./yt-archive & \
+	trap 'kill $$(pgrep yt-archive) && exit 0' SIGINT SIGTERM && \
+	(cd frontend && npm run dev) 
 
 clean:
 	rm yt-archive
