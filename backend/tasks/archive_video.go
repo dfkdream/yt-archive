@@ -204,9 +204,7 @@ func calculateFormatPreference(f format) int {
 		preference++
 	}
 
-	if canSkipEncoding(f) {
-		preference += 2
-	}
+	preference += encodingPreference(f)
 
 	if f.FPS > 30 {
 		preference++
@@ -216,19 +214,30 @@ func calculateFormatPreference(f format) int {
 }
 
 func canSkipEncoding(f format) bool {
+	return encodingPreference(f) == 2
+}
+
+func encodingPreference(f format) int {
 	if strings.HasPrefix(f.VideoCodec, "vp") {
 		// VP8 or VP9
-		return true
+		// No encoding required
+		return 2
 	}
 
 	if strings.HasPrefix(f.VideoCodec, "av01") {
 		// AV1
 		// AV1 in WebM is currently not working on iOS devices
-		// return true
-		return false
+		// return 2
+		return 0
 	}
 
-	return false
+	if strings.HasPrefix(f.VideoCodec, "avc") {
+		// H.264
+		// Hardware accelerated decoding
+		return 1
+	}
+
+	return 0
 }
 
 func parseVideoMetadata(path string) (*videoMetadata, error) {
