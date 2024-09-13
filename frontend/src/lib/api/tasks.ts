@@ -23,7 +23,12 @@ export function checkID(id: string): [string, string, 0 | 1]{
     try{
         let url = new URL(id);
 
-        if (url.host=="www.youtube.com" || url.host=="m.youtube.com"){
+        if (url.host=="www.youtube.com" || url.host=="m.youtube.com" || url.host=="youtube.com"){
+            if (url.pathname.startsWith("/shorts")){
+                id = url.pathname.slice(8);
+                console.log(id)
+            }
+
             if (url.pathname.startsWith("/live")){
                 id = url.pathname.slice(6);
             }
