@@ -3,6 +3,7 @@ package tasks
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -95,7 +96,8 @@ func (a ArchivePlaylistHandler) Handler(task *taskq.Task) error {
 	}
 
 	for _, videoID := range videos {
-		task, err := taskq.NewJsonTask(PriorityArchiveVideo, TaskTypeArchiveVideo, playlistID+" - "+videoID, videoID)
+		description := fmt.Sprintf("%s, from playlist %s", videoID, playlistID)
+		task, err := taskq.NewJsonTask(PriorityArchiveVideo, TaskTypeArchiveVideo, description, videoID)
 		if err != nil {
 			return err
 		}

@@ -107,7 +107,8 @@ func (a ArchiveVideoHandler) Handler(task *taskq.Task) error {
 		return err
 	}
 
-	t, err := taskq.NewJsonTask(PriorityArchiveChannelInfo, TaskTypeArchiveChannelInfo, videoID+"_"+metadata.Owner, metadata.Owner)
+	description := fmt.Sprintf("%s, from video %s", metadata.Owner, videoID)
+	t, err := taskq.NewJsonTask(PriorityArchiveChannelInfo, TaskTypeArchiveChannelInfo, description, metadata.Owner)
 	if err != nil {
 		return err
 	}
@@ -123,7 +124,7 @@ func (a ArchiveVideoHandler) Handler(task *taskq.Task) error {
 		SkipEncoding: false,
 	}
 
-	t, err = taskq.NewJsonTask(PriorityDownloadAudio, TaskTypeDownloadMedia, videoID+"_bestaudio", downloadMediaPayload)
+	t, err = taskq.NewJsonTask(PriorityDownloadAudio, TaskTypeDownloadMedia, videoID+", bestaudio", downloadMediaPayload)
 	if err != nil {
 		return err
 	}

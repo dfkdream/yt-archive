@@ -94,11 +94,14 @@ func enqueTaskHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var taskstring string
 	var tasktype string
 	switch params.Type {
 	case typeVideo:
+		taskstring = "Video"
 		tasktype = tasks.TaskTypeArchiveVideo
 	case typePlaylist:
+		taskstring = "Playlist"
 		tasktype = tasks.TaskTypeArchivePlaylist
 	default:
 		writeError(w, http.StatusBadRequest)
@@ -115,8 +118,8 @@ func enqueTaskHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	task, err := taskq.NewJsonTask(tasks.PriorityHighest, tasktype,
-		fmt.Sprintf("Request from %s", r.RemoteAddr), params.ID)
+	description := fmt.Sprintf("%s %s, Request from %s", taskstring, params.ID, r.RemoteAddr)
+	task, err := taskq.NewJsonTask(tasks.PriorityHighest, tasktype, description, params.ID)
 	if err != nil {
 		slog.Error("enqueueTaskHandler error", "msg", err)
 		writeError(w, http.StatusInternalServerError)
