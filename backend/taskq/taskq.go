@@ -74,6 +74,18 @@ func New(DB *sql.DB) (*Queue, error) {
 		return nil
 	}
 
+	r, err := DB.Exec("update tasks set status=? where status=?", statusQueued, statusRunning)
+	if err != nil {
+		return nil, err
+	}
+
+	rowsAffected, err := r.RowsAffected()
+	if err != nil {
+		return nil, err
+	}
+
+	slog.Info("reset all running tasks to queued state.", "rowsAffected", rowsAffected)
+
 	return &Queue{
 		db:              DB,
 		handlers:        make(map[string]TaskHandler),
