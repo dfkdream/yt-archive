@@ -18,6 +18,9 @@
 
     let tasks: Task[] = [];
 
+    $: queuedTasks = tasks.filter(t=>t.Status==0);
+    $: completedTasks = tasks.filter(t=>t.Status>1);
+
     async function submitTask(){
         if (validationError) return;
 
@@ -60,13 +63,13 @@
 <TaskCard task={t} />
 {/each}
 
-<BlockTitle>Queued Tasks</BlockTitle>
-{#each tasks.filter(t=>t.Status==0) as t}
+<BlockTitle>Queued Tasks ({queuedTasks.length})</BlockTitle>
+{#each queuedTasks as t}
 <TaskCard task={t} />
 {/each}
 
-<BlockTitle>Completed Tasks</BlockTitle>
-{#each tasks.filter(t=>t.Status>1) as t}
+<BlockTitle>Completed Tasks ({completedTasks.length})</BlockTitle>
+{#each completedTasks as t}
 <TaskCard task={t} />
 {/each}
 
