@@ -7,8 +7,8 @@
 
 <Block strong inset class="flex items-center !my-4">
     <img src={`/api/channels/${channel.ID}/${channel.Thumbnail}`} alt={channel.Title} width="45px" class="rounded-full"/>
-    <span class="mx-2">
+    <div class="mx-2 overflow-hidden">
         <h2 class="text-lg font-bold">{channel.Title}</h2>
-        <pre class="font-sans overflow-y-scroll">{channel.Description.trim()}</pre>
-    </span>
+        <pre class="font-sans overflow-x-scroll">{channel.Description.trim()}</pre>
+    </div>
 </Block>

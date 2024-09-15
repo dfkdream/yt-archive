@@ -47,13 +47,13 @@
 </svelte:head>
 
 <DashVideo {manifest} {poster} controls playsinline 
-class="m-auto w-full sticky top-0 z-50" bind:videoQuality bind:videoBitrateList
+class="m-auto w-full sticky top-0 z-50 max-h-[60vh] bg-black" bind:videoQuality bind:videoBitrateList
 bind:bufferLength />
 
 {#if video}
 <VideoCard video={video} showChannel fullTitle />
 <Block strong inset>
-    <pre class="font-sans overflow-y-scroll">{video.Description.trim()}</pre>
+    <pre class="font-sans overflow-x-scroll">{video.Description.trim()}</pre>
 </Block>
 {/if}
 
