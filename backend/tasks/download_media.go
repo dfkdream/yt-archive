@@ -56,9 +56,9 @@ func DownloadMediaHandler(task *taskq.Task) error {
 	slog.Info("download completed", "filename", filename)
 
 	if (payload.Format == "bestaudio" && filepath.Ext(filename) == ".webm") || payload.SkipEncoding {
-		err = Exec("ffmpeg", "-i", filepath.Join(tempDir, filename), "-f", "webm", "-c", "copy", "-dash", "1", payload.OutputPath)
+		err = Exec("ffmpeg", "-hide_banner", "-y", "-i", filepath.Join(tempDir, filename), "-f", "webm", "-c", "copy", "-dash", "1", payload.OutputPath)
 	} else {
-		err = Exec("ffmpeg", "-i", filepath.Join(tempDir, filename), "-keyint_min", "150", "-g", "150", "-tile-columns", "4", "-frame-parallel", "1", "-f", "webm", "-dash", "1", payload.OutputPath)
+		err = Exec("ffmpeg", "-hide_banner", "-y", "-i", filepath.Join(tempDir, filename), "-keyint_min", "150", "-g", "150", "-tile-columns", "4", "-frame-parallel", "1", "-f", "webm", "-dash", "1", payload.OutputPath)
 	}
 
 	if err != nil {
@@ -96,7 +96,7 @@ func buildManifest(path string, output string) error {
 		}
 	}
 
-	command := []string{"-y"}
+	command := []string{"-hide_banner", "-y"}
 
 	for _, filepath := range videoFiles {
 		command = append(command, "-f", "webm_dash_manifest", "-i", filepath)
