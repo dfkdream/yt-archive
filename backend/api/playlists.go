@@ -36,6 +36,7 @@ func (p playlistsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	on pv.videoId=v.id	
 	where c.thumbnail not null
 	and v.id not null
+	order by p.rowid desc
 	`
 
 	rows, err := p.DB.Query(query)

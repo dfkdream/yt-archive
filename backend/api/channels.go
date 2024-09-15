@@ -64,6 +64,7 @@ func (c channelVideosHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	left join videos as v
 	on v.owner = c.id
 	where c.id=?
+	order by v.rowid desc
 	`
 
 	rows, err := c.DB.Query(query, id)
