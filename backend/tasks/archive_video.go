@@ -273,19 +273,27 @@ func copyThumbnail(path string, dest string) (string, error) {
 		return "", errors.New("could not find thumbnail in directory " + path)
 	}
 
-	src, err := os.Open(filepath.Join(path, filename))
+	err = copyFile(filepath.Join(path, filename), filepath.Join(dest, filename))
 	if err != nil {
 		return "", err
 	}
-	defer src.Close()
-
-	dst, err := os.Create(filepath.Join(dest, filename))
-	if err != nil {
-		return "", err
-	}
-	defer dst.Close()
-
-	_, err = io.Copy(dst, src)
 
 	return filename, err
+}
+
+func copyFile(src, dst string) error {
+	s, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer s.Close()
+
+	d, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer d.Close()
+
+	_, err = io.Copy(d, s)
+	return err
 }

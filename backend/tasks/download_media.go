@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"yt-archive/taskq"
 )
 
@@ -65,77 +64,33 @@ func DownloadMediaHandler(task *taskq.Task) error {
 		return err
 	}
 
-	outputDir := filepath.Join(payload.OutputPath, "..")
-	manifestPath := filepath.Join(outputDir, payload.VideoID+".mpd")
-	return buildManifest(outputDir, manifestPath)
-}
-
-func buildManifest(path string, output string) error {
-	files, err := os.ReadDir(path)
+	tempMpd := filepath.Join(tempDir, "manifest.mpd")
+	err = buildManifest(payload.OutputPath, tempMpd)
 	if err != nil {
 		return err
 	}
 
-	videoFiles := make([]string, 0)
-	audioFile := ""
-	for _, f := range files {
-		if f.IsDir() {
-			continue
-		}
-
-		if filepath.Ext(f.Name()) != MEDIA_FILE_SUFFIX {
-			continue
-		}
-
-		filepath := filepath.Join(path, f.Name())
-
-		if strings.HasSuffix(f.Name(), AUDIO_FILE_SUFFIX) {
-			audioFile = filepath
-		} else {
-			videoFiles = append(videoFiles, filepath)
-		}
+	masterMpd := filepath.Join(payload.OutputPath, "..", payload.VideoID+".mpd")
+	if _, err = os.Stat(masterMpd); err == nil {
+		slog.Info("Master mpd found.", "path", masterMpd)
+		return mergeMPDs(masterMpd, tempMpd)
+	} else if errors.Is(err, os.ErrNotExist) {
+		slog.Info("Master mpd not found. copying.", "from", tempMpd, "to", masterMpd)
+		return copyFile(tempMpd, masterMpd)
+	} else {
+		return err
 	}
+}
 
-	command := []string{"-hide_banner", "-y"}
-
-	for _, filepath := range videoFiles {
-		command = append(command, "-f", "webm_dash_manifest", "-i", filepath)
+func buildManifest(path string, output string) error {
+	command := []string{
+		"-hide_banner", "-y",
+		"-f", "webm_dash_manifest", "-i", path,
+		"-c", "copy",
+		"-map", "0",
+		"-f", "webm_dash_manifest",
+		"-adaptation_sets", "id=0,streams=0", output,
 	}
-
-	if audioFile != "" {
-		command = append(command, "-f", "webm_dash_manifest", "-i", audioFile)
-	}
-
-	command = append(command, "-c", "copy")
-
-	filecount := len(videoFiles)
-	if audioFile != "" {
-		filecount += 1
-	}
-
-	for i := 0; i < filecount; i++ {
-		command = append(command, "-map", strconv.Itoa(i))
-	}
-
-	command = append(command, "-f", "webm_dash_manifest")
-
-	adaptationSets := "id=0,streams="
-
-	for i := range videoFiles {
-		adaptationSets += strconv.Itoa(i)
-
-		if i < len(videoFiles)-1 {
-			adaptationSets += ","
-		} else if audioFile != "" {
-			adaptationSets += " id=1,streams="
-		}
-	}
-
-	if audioFile != "" {
-		adaptationSets += strconv.Itoa(len(videoFiles))
-	}
-
-	command = append(command, "-adaptation_sets", adaptationSets, output)
 
 	return Exec("ffmpeg", command...)
 }
