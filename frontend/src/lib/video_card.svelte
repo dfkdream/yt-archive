@@ -11,7 +11,10 @@
 
 <Block strong inset class={needStyle?"!my-1 md:!my-4":""}>
     {#if showPoster}
-    <img class="mb-2" src={`/api/videos/${video.ID}/${video.Thumbnail}`} alt={video.Title}/>
+    <div class="relative">
+        <img class="mb-2" src={`/api/videos/${video.ID}/${video.Thumbnail}`} alt={video.Title}/>
+        <span class="bg-black text-white p-1 rounded opacity-70 absolute bottom-1 right-1">{video.Duration}</span>
+    </div>
     {/if}
 
     <h2 class={
