@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"yt-archive/api"
@@ -11,6 +12,24 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 )
+
+func init() {
+	logLevel := os.Getenv("YT_ARCHIVE_LOG_LEVEL")
+
+	switch logLevel {
+	case "ERROR":
+		slog.SetLogLoggerLevel(slog.LevelError)
+	case "INFO":
+		slog.SetLogLoggerLevel(slog.LevelInfo)
+	case "DEBUG":
+		slog.SetLogLoggerLevel(slog.LevelDebug)
+	default:
+		slog.SetLogLoggerLevel(slog.LevelInfo)
+		logLevel = "INFO"
+	}
+
+	log.Printf("YT_ARCHIVE_LOG_LEVEL: %s\n", logLevel)
+}
 
 func main() {
 	err := os.MkdirAll("database", os.FileMode(0o700))

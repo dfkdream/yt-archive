@@ -14,7 +14,7 @@ type FileServer struct {
 
 func (f *FileServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := filepath.Clean(r.URL.Path)
-	slog.Info("FileServer request", "path", path)
+	slog.Debug("FileServer request", "path", path)
 
 	isDir, err := serveFile(w, r, f.FS, path)
 

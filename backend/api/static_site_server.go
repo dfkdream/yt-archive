@@ -15,7 +15,7 @@ type StaticSiteServer struct {
 
 func (s *StaticSiteServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := filepath.Clean(r.URL.Path)
-	slog.Info("StaticSiteServer request", "path", path)
+	slog.Debug("StaticSiteServer request", "path", path)
 
 	isdir, err := serveFile(w, r, s.FS, path)
 
