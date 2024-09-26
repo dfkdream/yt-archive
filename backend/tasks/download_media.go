@@ -37,7 +37,8 @@ func DownloadMediaHandler(task *taskq.Task) error {
 	}
 	defer os.RemoveAll(tempDir)
 
-	err = Exec("yt-dlp", "-f", payload.Format, "-o", "%(id)s.%(ext)s", "--paths", tempDir, payload.VideoID)
+	videoURL := "https://www.youtube.com/watch?v=" + payload.VideoID
+	err = Exec("yt-dlp", "-f", payload.Format, "-o", "%(id)s.%(ext)s", "--paths", tempDir, videoURL)
 	if err != nil {
 		return err
 	}

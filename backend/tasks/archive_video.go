@@ -78,7 +78,8 @@ func (a ArchiveVideoHandler) Handler(task *taskq.Task) error {
 	}
 	defer os.RemoveAll(tempDir)
 
-	err = Exec("yt-dlp", "--write-info-json", "--skip-download", "--write-thumbnail", "-o", "%(id)s.%(ext)s", "--paths", tempDir, videoID)
+	videoURL := "https://www.youtube.com/watch?v=" + videoID
+	err = Exec("yt-dlp", "--write-info-json", "--skip-download", "--write-thumbnail", "-o", "%(id)s.%(ext)s", "--paths", tempDir, videoURL)
 	if err != nil {
 		return err
 	}
