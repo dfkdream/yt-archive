@@ -10,12 +10,8 @@
 	export let width: number | string | undefined | null = undefined;
 	export let poster: string | undefined | null = undefined;
 	export let controls: boolean | undefined | null = undefined;
-    export let autoplay: boolean | undefined | null = undefined;
 	export let playsinline: boolean | undefined | null = undefined;
-	export let disablepictureinpicture: boolean | undefined | null = undefined;
-	export let disableremoteplayback: boolean | undefined | null = undefined;
-
-    export let pip = false;
+	export let loop: boolean | undefined | null = undefined;
 
     export let videoQuality: number = 0;
     export let bufferLength: number = 0;
@@ -26,7 +22,7 @@
     onMount(async ()=>{
         const {MediaPlayer} = await import('dashjs');
         player = MediaPlayer().create();
-        player.initialize(videoElement, manifest, autoplay?true:false);
+        player.initialize(videoElement, manifest, false);
 
         player.on("metricsChanged", ()=>{
             if (!player) return;
@@ -41,8 +37,13 @@
     });
 </script>
 
+<!-- svelte-ignore a11y-media-has-caption -->
 <video bind:this={videoElement}
-    {height} {width} {poster} {controls} {autoplay} {playsinline} 
-    {disablepictureinpicture} {disableremoteplayback} {...$$restProps}>
+    {height} {width} {poster} 
+    {controls} 
+    {playsinline} 
+    loop={loop?loop:undefined} 
+    {...$$restProps}
+>
     <slot />
 </video>

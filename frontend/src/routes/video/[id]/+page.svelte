@@ -1,10 +1,11 @@
 <script lang="ts">
     import { type Video, VideoInfo } from '$lib/api/video';
+    import DashAudio from '$lib/dash_audio.svelte';
     import DashVideo from '$lib/dash_video.svelte';
     import Tabbar from '$lib/tabbar.svelte';
     import VideoCard from '$lib/video_card.svelte';
     import type dashjs from 'dashjs';
-    import { List, ListItem, Block } from 'konsta/svelte';
+    import { List, ListItem, Block, Toggle } from 'konsta/svelte';
     import { onMount } from 'svelte';
 
     export let data;
@@ -20,6 +21,9 @@
     let bufferLength = 0;
     let videoQuality = 0;
     let videoBitrateList: dashjs.BitrateInfo[] | null = null;
+
+    let loop = false;
+    let radioMode = false;
 
     let bitrateString = "N/A";
     function getBitrateString(list: dashjs.BitrateInfo[] | null, quality: number): string{
@@ -46,9 +50,13 @@
     {/if}
 </svelte:head>
 
-<DashVideo {manifest} {poster} controls playsinline 
+{#if radioMode}
+<DashAudio {manifest} {poster} controls {loop} bind:bufferLength class="m-auto w-full sticky top-0 z-50 bg-black"/>
+{:else}
+<DashVideo {manifest} {poster} controls playsinline {loop}
 class="m-auto w-full sticky top-0 z-50 max-h-[60vh] bg-black" bind:videoQuality bind:videoBitrateList
 bind:bufferLength />
+{/if}
 
 {#if video}
 <VideoCard video={video} showChannel fullTitle />
@@ -58,7 +66,26 @@ bind:bufferLength />
 {/if}
 
 <List strong inset>
+    <ListItem title="Loop">
+        <Toggle
+            slot="after"
+            checked={loop}
+            onChange={()=>{loop=!loop}}
+        />
+    </ListItem>
+    <ListItem title="Radio Mode">
+        <Toggle
+            slot="after"
+            checked={radioMode}
+            onChange={()=>{radioMode=!radioMode}}
+        />
+    </ListItem>
+</List>
+
+<List strong inset>
+    {#if !radioMode}
     <ListItem title="Quality" after={bitrateString} />
+    {/if}
     <ListItem title="Buffer length" after={bufferLength} />
 </List>
 
