@@ -69,15 +69,13 @@ bind:bufferLength />
     <ListItem title="Loop">
         <Toggle
             slot="after"
-            checked={loop}
-            onChange={()=>{loop=!loop}}
+            bind:checked={loop}
         />
     </ListItem>
     <ListItem title="Radio Mode">
         <Toggle
             slot="after"
-            checked={radioMode}
-            onChange={()=>{radioMode=!radioMode}}
+            bind:checked={radioMode}
         />
     </ListItem>
 </List>
