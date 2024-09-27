@@ -44,7 +44,7 @@
             <span class="text-sm mx-2">
                 {playlistVideos.Owner}
                 <br />
-                수정 시각: {playlistVideos.Timestamp.toLocaleString([], {
+                Last modified: {playlistVideos.Timestamp.toLocaleString([], {
                     dateStyle: "medium",
                     timeStyle: "medium",
                 })}
