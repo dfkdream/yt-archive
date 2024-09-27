@@ -2,6 +2,7 @@ package api
 
 import (
 	"database/sql"
+	"encoding/json"
 	"log/slog"
 	"net/http"
 	"time"
@@ -77,9 +78,14 @@ type playlistVideosHandler struct {
 	DB *sql.DB
 }
 
+type VideoWithIndex struct {
+	Video
+	Index int
+}
+
 type PlaylistVideos struct {
 	Playlist
-	Videos []Video
+	Videos []VideoWithIndex
 }
 
 func (p playlistVideosHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -87,7 +93,7 @@ func (p playlistVideosHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 
 	query := `
 	select p.id, p.title, p.description, p.timestamp, p.owner, c.thumbnail,
-		v.id, v.title, v.description, v.timestamp, v.duration, v.owner, v.thumbnail
+		v.id, v.title, v.description, v.timestamp, v.duration, v.owner, v.thumbnail, pv.sortIndex
 	from playlists as p
 	left join channels as c
 	on p.owner=c.id
@@ -96,6 +102,7 @@ func (p playlistVideosHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 	left join videos as v
 	on pv.videoId=v.id	
 	where p.id=?
+	order by pv.sortIndex desc
 	`
 
 	rows, err := p.DB.Query(query, id)
@@ -109,12 +116,12 @@ func (p playlistVideosHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 
 	var playlistVideos PlaylistVideos
 	for rows.Next() {
-		var video Video
+		var video VideoWithIndex
 		err = rows.Scan(
 			&playlistVideos.ID, &playlistVideos.Title, &playlistVideos.Description,
 			&playlistVideos.Timestamp, &playlistVideos.Owner, &playlistVideos.OwnerThumbnail,
 			&video.ID, &video.Title, &video.Description, &video.Timestamp, &video.Duration,
-			&video.Owner, &video.Thumbnail,
+			&video.Owner, &video.Thumbnail, &video.Index,
 		)
 
 		if err != nil {
@@ -134,4 +141,49 @@ func (p playlistVideosHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 	}
 
 	writeJson(w, playlistVideos)
+}
+
+type playlistVideoIndexHandler struct {
+	DB *sql.DB
+}
+
+func (p playlistVideoIndexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	playlistID := mux.Vars(r)["pid"]
+	videoID := mux.Vars(r)["vid"]
+	var index int
+	err := json.NewDecoder(r.Body).Decode(&index)
+	if err != nil {
+		slog.Error("playlistVideoIndexHandler error", "msg", err)
+		writeError(w, http.StatusBadRequest)
+		return
+	}
+
+	tx, err := p.DB.Begin()
+	if err != nil {
+		slog.Error("playlistVideoIndexHandler error", "msg", err)
+		writeError(w, http.StatusInternalServerError)
+		return
+	}
+
+	res, err := tx.Exec("update playlist_video set sortIndex=? where playlistId=? and videoId=?", index, playlistID, videoID)
+	if err != nil {
+		slog.Error("playlistVideoIndexHandler error", "msg", err)
+		writeError(w, http.StatusInternalServerError)
+		return
+	}
+
+	if r, _ := res.RowsAffected(); r != 1 {
+		writeError(w, http.StatusNotFound)
+		tx.Rollback()
+		return
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		slog.Error("playlistVideoIndexHandler error", "msg", err)
+		writeError(w, http.StatusInternalServerError)
+		return
+	}
+
+	writeJson(w, index)
 }

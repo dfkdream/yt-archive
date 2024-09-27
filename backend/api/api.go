@@ -47,6 +47,11 @@ func New(db *sql.DB) http.Handler {
 		Methods(http.MethodGet).
 		Handler(playlistVideosHandler{DB: db})
 
+	r.Path("/api/playlists/{pid}/video/{vid}/index").
+		Methods(http.MethodPost).
+		Headers("Content-Type", "application/json").
+		Handler(playlistVideoIndexHandler{DB: db})
+
 	r.Path("/api/tasks").
 		Methods(http.MethodGet).
 		Handler(tasksHandler{DB: db})

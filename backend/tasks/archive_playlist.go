@@ -24,7 +24,7 @@ func NewArchivePlaylistHandler(db *sql.DB) (ArchivePlaylistHandler, error) {
 		return ArchivePlaylistHandler{}, err
 	}
 
-	_, err = db.Exec("create table if not exists playlist_video (playlistId text, videoId text, unique (playlistId, videoId), primary key (playlistId, videoId))")
+	_, err = db.Exec("create table if not exists playlist_video (playlistId text, videoId text, sortIndex integer, unique (playlistId, videoId), primary key (playlistId, videoId))")
 	if err != nil {
 		return ArchivePlaylistHandler{}, err
 	}
@@ -125,7 +125,7 @@ func (a ArchivePlaylistHandler) Handler(task *taskq.Task) error {
 	}
 
 	for _, videoID := range videos {
-		_, err = tx.Exec("insert into playlist_video (playlistId, videoId) values (?, ?) on conflict(playlistId, videoId) do nothing",
+		_, err = tx.Exec("insert into playlist_video (playlistId, videoId, sortIndex) values (?, ?, 0) on conflict(playlistId, videoId) do nothing",
 			playlistID, videoID)
 		if err != nil {
 			tx.Rollback()

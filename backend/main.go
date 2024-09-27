@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 	"log/slog"
 	"net/http"
@@ -37,12 +38,22 @@ func main() {
 		log.Fatal(err)
 	}
 
+	migrationRequired := true
+	_, err = os.Stat("database/yt-archive.db")
+	if errors.Is(err, os.ErrNotExist) {
+		migrationRequired = false
+	}
+
 	db, err := sql.Open("sqlite3", "file:database/yt-archive.db?_journal_mode=WAL&_txlock=immediate")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	db.SetMaxOpenConns(1)
+
+	if migrationRequired {
+		migrate(db)
+	}
 
 	q, err := taskq.New(db)
 	if err != nil {
