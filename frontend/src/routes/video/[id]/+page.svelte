@@ -8,6 +8,8 @@
     import { List, ListItem, Block, Toggle } from 'konsta/svelte';
     import { onMount } from 'svelte';
 
+    let mediaClass = "m-auto w-full sticky top-0 z-50 max-h-[60vh] bg-black";
+
     export let data;
 
     let video: Video;
@@ -51,11 +53,26 @@
 </svelte:head>
 
 {#if radioMode}
-<DashAudio {manifest} {poster} controls {loop} bind:bufferLength class="m-auto w-full sticky top-0 z-50 bg-black"/>
+<DashAudio 
+    {manifest} 
+    {poster} 
+    controls 
+    {loop} 
+    bind:bufferLength 
+    class={mediaClass}
+/>
 {:else}
-<DashVideo {manifest} {poster} controls playsinline {loop}
-class="m-auto w-full sticky top-0 z-50 max-h-[60vh] bg-black" bind:videoQuality bind:videoBitrateList
-bind:bufferLength />
+<DashVideo 
+    {manifest} 
+    {poster} 
+    controls 
+    playsinline 
+    {loop}
+    class={mediaClass}
+    bind:videoQuality 
+    bind:videoBitrateList
+    bind:bufferLength
+/>
 {/if}
 
 {#if video}
