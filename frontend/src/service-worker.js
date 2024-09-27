@@ -1,3 +1,6 @@
-import { precacheAndRoute } from 'workbox-precaching'
+import { precacheAndRoute } from "workbox-precaching";
 
-precacheAndRoute(self.__WB_MANIFEST, { directoryIndex: 'index.html', cleanURLs: true });
+precacheAndRoute(self.__WB_MANIFEST, {
+    directoryIndex: "index.html",
+    cleanURLs: true,
+});

@@ -7,9 +7,9 @@
 
     let channels: Channel[] = [];
 
-    onMount(async ()=>{
+    onMount(async () => {
         channels = await Channels();
-    })
+    });
 </script>
 
 <svelte:head>
@@ -19,9 +19,9 @@
 <Navbar medium transparent title="Channels" />
 
 {#each channels as c}
-<a href={`/channels/${c.ID}`}>
-    <ChannelCard channel={c} />
-</a>
+    <a href={`/channels/${c.ID}`}>
+        <ChannelCard channel={c} />
+    </a>
 {/each}
 
 <Tabbar location="channels" />

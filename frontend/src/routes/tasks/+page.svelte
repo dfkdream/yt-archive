@@ -1,27 +1,41 @@
 <script lang="ts">
-    import { checkID, SubmitTask, Tasks, type Task, type TaskRequest } from "$lib/api/tasks";
+    import {
+        checkID,
+        SubmitTask,
+        Tasks,
+        type Task,
+        type TaskRequest,
+    } from "$lib/api/tasks";
     import Tabbar from "$lib/tabbar.svelte";
     import TaskCard from "$lib/task_card.svelte";
-    import { BlockTitle, List, ListButton, ListInput, Navbar } from "konsta/svelte";
+    import {
+        BlockTitle,
+        List,
+        ListButton,
+        ListInput,
+        Navbar,
+    } from "konsta/svelte";
     import { onMount } from "svelte";
 
     let taskRequest: TaskRequest = {
         Type: 0,
-        ID: ""
+        ID: "",
     };
 
     let validationError = "";
 
-    function validateID(){
-        [validationError, taskRequest.ID, taskRequest.Type] = checkID(taskRequest.ID)
+    function validateID() {
+        [validationError, taskRequest.ID, taskRequest.Type] = checkID(
+            taskRequest.ID,
+        );
     }
 
     let tasks: Task[] = [];
 
-    $: queuedTasks = tasks.filter(t=>t.Status==0);
-    $: completedTasks = tasks.filter(t=>t.Status>1);
+    $: queuedTasks = tasks.filter((t) => t.Status == 0);
+    $: completedTasks = tasks.filter((t) => t.Status > 1);
 
-    async function submitTask(){
+    async function submitTask() {
         if (validationError) return;
 
         if (!taskRequest.ID) return;
@@ -36,10 +50,9 @@
         location.hash = id;
     }
 
-    onMount(async ()=>{
+    onMount(async () => {
         tasks = await Tasks();
-    })
-
+    });
 </script>
 
 <svelte:head>
@@ -50,7 +63,13 @@
 
 <BlockTitle>New Task</BlockTitle>
 <List strong inset>
-    <ListInput type="text" bind:value={taskRequest.ID} error={validationError} onChange={validateID} placeholder="URL/ID" />
+    <ListInput
+        type="text"
+        bind:value={taskRequest.ID}
+        error={validationError}
+        onChange={validateID}
+        placeholder="URL/ID"
+    />
     <ListInput type="select" bind:value={taskRequest.Type} dropdown>
         <option value={0}>Video</option>
         <option value={1}>Playlist</option>
@@ -59,18 +78,18 @@
 </List>
 
 <BlockTitle>Running Tasks</BlockTitle>
-{#each tasks.filter(t=>t.Status==1) as t}
-<TaskCard task={t} />
+{#each tasks.filter((t) => t.Status == 1) as t}
+    <TaskCard task={t} />
 {/each}
 
 <BlockTitle>Queued Tasks ({queuedTasks.length})</BlockTitle>
 {#each queuedTasks as t}
-<TaskCard task={t} />
+    <TaskCard task={t} />
 {/each}
 
 <BlockTitle>Completed Tasks ({completedTasks.length})</BlockTitle>
 {#each completedTasks as t}
-<TaskCard task={t} />
+    <TaskCard task={t} />
 {/each}
 
 <Tabbar location="tasks" />

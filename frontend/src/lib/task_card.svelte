@@ -4,7 +4,7 @@
 
     export let task: Task;
 
-    function formatPayload(payload: string){
+    function formatPayload(payload: string) {
         return JSON.stringify(JSON.parse(atob(payload)), null, 2);
     }
 </script>

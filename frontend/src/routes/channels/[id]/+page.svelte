@@ -10,22 +10,26 @@
 
     export let channelVideos: ChannelVideos;
 
-    onMount(async ()=>{
-        channelVideos = await ChannelVideos(data.id); 
-    })
+    onMount(async () => {
+        channelVideos = await ChannelVideos(data.id);
+    });
 </script>
 
 <svelte:head>
     {#if channelVideos}
-    <title>{channelVideos.Title} - yt-archive</title>
+        <title>{channelVideos.Title} - yt-archive</title>
     {:else}
-    <title>{data.id} - yt-archive</title>
+        <title>{data.id} - yt-archive</title>
     {/if}
 </svelte:head>
 
-<Navbar medium transparent title={channelVideos && channelVideos.ID || data.id} />
+<Navbar
+    medium
+    transparent
+    title={(channelVideos && channelVideos.ID) || data.id}
+/>
 {#if channelVideos}
-<ChannelCard channel={channelVideos} />
-<VideoGrid videos={channelVideos.Videos} />
+    <ChannelCard channel={channelVideos} />
+    <VideoGrid videos={channelVideos.Videos} />
 {/if}
 <Tabbar />

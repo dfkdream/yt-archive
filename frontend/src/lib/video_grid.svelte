@@ -8,8 +8,8 @@
 
 <div class="grid gap-1 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
     {#each videos as v}
-    <a href={`/video/${v.ID}/`}>
-        <VideoCard video={v} showChannel={showChannel} showPoster needStyle />
-    </a>
+        <a href={`/video/${v.ID}/`}>
+            <VideoCard video={v} {showChannel} showPoster needStyle />
+        </a>
     {/each}
 </div>
