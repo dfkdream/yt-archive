@@ -19,6 +19,10 @@
             #frontend
             nodejs
           ];
+
+          shellHook = ''
+            $SHELL
+          '';
         };
 
         formatter = pkgs.nixpkgs-fmt;
