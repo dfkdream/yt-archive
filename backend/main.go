@@ -51,9 +51,7 @@ func main() {
 
 	db.SetMaxOpenConns(1)
 
-	if migrationRequired {
-		migrate(db)
-	}
+	migrate(db, migrationRequired)
 
 	q, err := taskq.New(db)
 	if err != nil {
