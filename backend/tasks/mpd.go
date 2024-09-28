@@ -55,13 +55,14 @@ func mergeMPD(dst *mpd.MPD, src *mpd.MPD) error {
 				dstPeriod.AdaptationSets = append(srcPeriod.AdaptationSets, dstPeriod.AdaptationSets...)
 				break
 			} else {
-				needUpdate, err := isHeigherRes(a, videos)
+				needUpdate, err := isResUpdateRequired(videos, a)
 				if err != nil {
 					return err
 				}
 				if needUpdate {
-					*videos.Width = *a.Width
-					*videos.Height = *a.Height
+					slog.Info("updating adaptation set resolution")
+					videos.Width = a.Width
+					videos.Height = a.Height
 				}
 				videos.Representations = append(videos.Representations, a.Representations...)
 			}
@@ -87,26 +88,34 @@ func mergeMPD(dst *mpd.MPD, src *mpd.MPD) error {
 	return nil
 }
 
-func isHeigherRes(left, right *mpd.AdaptationSet) (bool, error) {
-	lw, err := strconv.Atoi(*left.Width)
+func isResUpdateRequired(src, target *mpd.AdaptationSet) (bool, error) {
+	if target.Width == nil || target.Height == nil {
+		return false, nil
+	}
+
+	if src.Width == nil || src.Height == nil {
+		return true, nil
+	}
+
+	sw, err := strconv.Atoi(*src.Width)
 	if err != nil {
 		return false, err
 	}
 
-	lh, err := strconv.Atoi(*left.Height)
+	sh, err := strconv.Atoi(*src.Height)
 	if err != nil {
 		return false, err
 	}
 
-	rw, err := strconv.Atoi(*right.Width)
+	tw, err := strconv.Atoi(*target.Width)
 	if err != nil {
 		return false, err
 	}
 
-	rh, err := strconv.Atoi(*right.Height)
+	th, err := strconv.Atoi(*target.Height)
 	if err != nil {
 		return false, err
 	}
 
-	return lw > rw && lh > rh, nil
+	return tw > sw && th > sh, nil
 }
