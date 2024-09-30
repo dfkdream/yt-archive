@@ -1,7 +1,7 @@
 BACKEND_FILES = $(shell find backend -type f -name '*')
 FRONTEND_FILES = $(shell find frontend/src frontend/static frontend/*.js* -type f -name '*')
 
-all: dist yt-archive
+all: dist yt-archive rebuild_mpd
 
 dist: $(FRONTEND_FILES)
 	cd frontend &&\
@@ -19,6 +19,10 @@ dev: yt-archive
 	YT_ARCHIVE_ADDR=localhost:8080 ./yt-archive & \
 	trap 'kill $$(pgrep yt-archive) && exit 0' SIGINT SIGTERM && \
 	(cd frontend && npm run dev) 
+
+rebuild_mpd: yt-archive
+	cd backend &&\
+	go build -o .. ./cmd/rebuild_mpd
 
 clean:
 	rm yt-archive

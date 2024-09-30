@@ -68,10 +68,10 @@ func DownloadMediaHandler(task *taskq.Task) error {
 
 	outputDir := filepath.Join(payload.OutputPath, "..")
 	manifestPath := filepath.Join(outputDir, payload.VideoID+".mpd")
-	return buildManifest(outputDir, manifestPath)
+	return BuildManifest(outputDir, manifestPath)
 }
 
-func buildManifest(path string, output string) error {
+func BuildManifest(path string, output string) error {
 	files, err := os.ReadDir(path)
 	if err != nil {
 		return err
