@@ -72,15 +72,7 @@ func DownloadMediaHandler(task *taskq.Task) error {
 	}
 
 	masterMpd := filepath.Join(payload.OutputPath, "..", payload.VideoID+".mpd")
-	if _, err = os.Stat(masterMpd); err == nil {
-		slog.Info("Master mpd found.", "path", masterMpd)
-		return mergeMPDs(masterMpd, tempMpd)
-	} else if errors.Is(err, os.ErrNotExist) {
-		slog.Info("Master mpd not found. copying.", "from", tempMpd, "to", masterMpd)
-		return copyFile(tempMpd, masterMpd)
-	} else {
-		return err
-	}
+	return mergeMPDs(masterMpd, tempMpd)
 }
 
 func buildManifest(path string, output string) error {

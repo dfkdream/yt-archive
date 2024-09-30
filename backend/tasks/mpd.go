@@ -2,6 +2,7 @@ package tasks
 
 import (
 	"errors"
+	"io/fs"
 	"log/slog"
 	"strconv"
 
@@ -15,7 +16,10 @@ var (
 func mergeMPDs(dstPath string, srcPaths ...string) error {
 	slog.Info("merging mpds.", "dst", dstPath, "srcs", srcPaths)
 	d, err := mpd.ReadFromFile(dstPath)
-	if err != nil {
+
+	if errors.Is(err, fs.ErrNotExist) {
+		d = nil
+	} else if err != nil {
 		return err
 	}
 
@@ -24,6 +28,12 @@ func mergeMPDs(dstPath string, srcPaths ...string) error {
 		if err != nil {
 			return err
 		}
+
+		if d == nil {
+			d = s
+			s = nil
+		}
+
 		mergeMPD(d, s)
 	}
 
@@ -31,6 +41,16 @@ func mergeMPDs(dstPath string, srcPaths ...string) error {
 }
 
 func mergeMPD(dst *mpd.MPD, src *mpd.MPD) error {
+	if src == nil {
+		for _, a := range dst.Periods[0].AdaptationSets {
+			if *a.MimeType == "video/webm" && a.Width != nil && a.Height != nil && len(a.Representations) == 1 {
+				return updateSingleVideoAdaptationSet(a)
+			}
+		}
+
+		return nil
+	}
+
 	if len(src.Periods) == 0 || len(dst.Periods) == 0 {
 		return ErrNoPeriod
 	}
@@ -51,19 +71,20 @@ func mergeMPD(dst *mpd.MPD, src *mpd.MPD) error {
 
 	for _, a := range srcPeriod.AdaptationSets {
 		if *a.MimeType == "video/webm" {
+			if a.Width != nil && a.Height != nil && len(a.Representations) == 1 {
+				// single video adaptationSet
+				slog.Info("single video adaptation set found. updating representation.")
+				updateSingleVideoAdaptationSet(a)
+			}
+		}
+	}
+
+	for _, a := range srcPeriod.AdaptationSets {
+		if *a.MimeType == "video/webm" {
 			if videos == nil {
 				dstPeriod.AdaptationSets = append(srcPeriod.AdaptationSets, dstPeriod.AdaptationSets...)
 				break
 			} else {
-				needUpdate, err := isResUpdateRequired(videos, a)
-				if err != nil {
-					return err
-				}
-				if needUpdate {
-					slog.Info("updating adaptation set resolution")
-					videos.Width = a.Width
-					videos.Height = a.Height
-				}
 				videos.Representations = append(videos.Representations, a.Representations...)
 			}
 		} else {
@@ -88,34 +109,21 @@ func mergeMPD(dst *mpd.MPD, src *mpd.MPD) error {
 	return nil
 }
 
-func isResUpdateRequired(src, target *mpd.AdaptationSet) (bool, error) {
-	if target.Width == nil || target.Height == nil {
-		return false, nil
-	}
-
-	if src.Width == nil || src.Height == nil {
-		return true, nil
-	}
-
-	sw, err := strconv.Atoi(*src.Width)
+func updateSingleVideoAdaptationSet(a *mpd.AdaptationSet) error {
+	width, err := strconv.ParseInt(*a.Width, 10, 64)
 	if err != nil {
-		return false, err
+		return err
 	}
 
-	sh, err := strconv.Atoi(*src.Height)
+	height, err := strconv.ParseInt(*a.Height, 10, 64)
 	if err != nil {
-		return false, err
+		return err
 	}
 
-	tw, err := strconv.Atoi(*target.Width)
-	if err != nil {
-		return false, err
-	}
+	a.Width = nil
+	a.Height = nil
+	a.Representations[0].Width = &width
+	a.Representations[0].Height = &height
 
-	th, err := strconv.Atoi(*target.Height)
-	if err != nil {
-		return false, err
-	}
-
-	return tw > sw && th > sh, nil
+	return nil
 }
