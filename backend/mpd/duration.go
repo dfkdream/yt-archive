@@ -25,6 +25,7 @@ func (i *ISO8601Duration) UnmarshalText(text []byte) error {
 }
 
 func (i ISO8601Duration) MarshalText() ([]byte, error) {
-	s := fmt.Sprintf("PT%gS", time.Duration(i).Seconds())
+	strSec := strconv.FormatFloat(time.Duration(i).Seconds(), 'f', -1, 64)
+	s := fmt.Sprintf("PT%sS", strSec)
 	return []byte(s), nil
 }
