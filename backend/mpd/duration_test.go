@@ -9,31 +9,37 @@ func TestISO8601Duration_UnmarshalText(t *testing.T) {
 	tests := []struct {
 		name    string
 		text    string
-		want    time.Duration
+		want    ISO8601Duration
 		wantErr bool
 	}{
 		{
 			name:    "integer",
 			text:    "PT1S",
-			want:    time.Second,
+			want:    ISO8601Duration(time.Second),
 			wantErr: false,
 		},
 		{
 			name:    "big integer",
 			text:    "PT18378S",
-			want:    time.Second * 18378,
+			want:    ISO8601Duration(time.Second * 18378),
 			wantErr: false,
 		},
 		{
 			name:    "decimal",
 			text:    "PT49.006S",
-			want:    time.Duration(49.006 * float64(time.Second)),
+			want:    ISO8601Duration(49.006 * float64(time.Second)),
 			wantErr: false,
 		},
 		{
 			name:    "big decimal",
 			text:    "PT18378.5S",
-			want:    time.Duration(18378.5 * float64(time.Second)),
+			want:    ISO8601Duration(18378.5 * float64(time.Second)),
+			wantErr: false,
+		},
+		{
+			name:    "very big decimal",
+			text:    "PT1837832819.5321321S",
+			want:    ISO8601Duration(1837832819.5321321 * float64(time.Second)),
 			wantErr: false,
 		},
 	}
@@ -43,7 +49,7 @@ func TestISO8601Duration_UnmarshalText(t *testing.T) {
 			if err := dummy.UnmarshalText([]byte(tt.text)); (err != nil) != tt.wantErr {
 				t.Errorf("ISO8601Duration.UnmarshalText() error = %v, wantErr %v", err, tt.wantErr)
 			} else {
-				if tt.want.Seconds() != time.Duration(dummy).Seconds() {
+				if tt.want != dummy {
 					t.Errorf("ISO8601Duration.UnmarshalText() = %v, want %v", dummy, tt.want)
 				}
 			}
@@ -80,6 +86,12 @@ func TestISO8601Duration_MarshalText(t *testing.T) {
 			name:    "big decimal",
 			i:       ISO8601Duration(18378.5 * float64(time.Second)),
 			want:    "PT18378.5S",
+			wantErr: false,
+		},
+		{
+			name:    "very big decimal",
+			i:       ISO8601Duration(1837832819.5321321 * float64(time.Second)),
+			want:    "PT1837832819.5321321S",
 			wantErr: false,
 		},
 	}
