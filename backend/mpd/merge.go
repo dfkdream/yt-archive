@@ -23,14 +23,19 @@ func Merge(m1, m2 MPD) MPD {
 			if videoSet.Representation == nil {
 				videoSet = a
 			} else {
+				if videoSet.Lang == "" && a.Lang != "" {
+					videoSet.Lang = a.Lang
+				}
 				videoSet.SubsegmentAlignment = false
 				videoSet.Representation = append(videoSet.Representation, a.Representation...)
-
 			}
 		case "audio/webm":
 			if audioSet.Representation == nil {
 				audioSet = a
 			} else {
+				if audioSet.Lang == "" && a.Lang != "" {
+					audioSet.Lang = a.Lang
+				}
 				audioSet.SubsegmentAlignment = false
 				audioSet.Representation = append(audioSet.Representation, a.Representation...)
 			}

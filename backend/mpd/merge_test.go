@@ -31,15 +31,50 @@ func TestMerge(t *testing.T) {
 			},
 		},
 		{
+			name: "Lang",
+			args: args{
+				m1: MPD{
+					Period: Period{
+						AdaptationSet: []AdaptationSet{
+							{
+								MimeType:       "video/webm",
+								Representation: []Representation{},
+							},
+						},
+					},
+				},
+				m2: MPD{
+					Period: Period{
+						AdaptationSet: []AdaptationSet{
+							{
+								MimeType:       "video/webm",
+								Lang:           "eng",
+								Representation: []Representation{},
+							},
+						},
+					},
+				},
+			},
+			want: MPD{
+				Period: Period{
+					AdaptationSet: []AdaptationSet{
+						{
+							MimeType:       "video/webm",
+							Lang:           "eng",
+							Representation: []Representation{},
+						},
+					},
+				},
+			},
+		},
+		{
 			name: "audio + audio",
 			args: args{
 				m1: MPD{
 					Period: Period{
 						AdaptationSet: []AdaptationSet{
 							{
-								MimeType: "video/webm",
-								Width:    10,
-								Height:   10,
+								MimeType: "audio/webm",
 								Representation: []Representation{
 									{
 										BaseURL: "test 1",
@@ -53,9 +88,7 @@ func TestMerge(t *testing.T) {
 					Period: Period{
 						AdaptationSet: []AdaptationSet{
 							{
-								MimeType: "video/webm",
-								Width:    10,
-								Height:   10,
+								MimeType: "audio/webm",
 								Representation: []Representation{
 									{
 										BaseURL: "test 2",
@@ -70,16 +103,12 @@ func TestMerge(t *testing.T) {
 				Period: Period{
 					AdaptationSet: []AdaptationSet{
 						{
-							MimeType: "video/webm",
+							MimeType: "audio/webm",
 							Representation: []Representation{
 								{
-									Width:   10,
-									Height:  10,
 									BaseURL: "test 1",
 								},
 								{
-									Width:   10,
-									Height:  10,
 									BaseURL: "test 2",
 								},
 							},
