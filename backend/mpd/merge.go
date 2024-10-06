@@ -56,5 +56,19 @@ func Merge(m1, m2 MPD) MPD {
 		result.Period.AdaptationSet = adaptationSet
 	}
 
+	reassignIDs(&result)
+
 	return result
+}
+
+func reassignIDs(mpd *MPD) {
+	repID := 0
+	for i := range mpd.Period.AdaptationSet {
+		a := &mpd.Period.AdaptationSet[i]
+		a.Id = i
+		for j := range a.Representation {
+			a.Representation[j].Id = repID
+			repID++
+		}
+	}
 }

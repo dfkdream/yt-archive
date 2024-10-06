@@ -106,9 +106,11 @@ func TestMerge(t *testing.T) {
 							MimeType: "audio/webm",
 							Representation: []Representation{
 								{
+									Id:      0,
 									BaseURL: "test 1",
 								},
 								{
+									Id:      1,
 									BaseURL: "test 2",
 								},
 							},
@@ -156,8 +158,10 @@ func TestMerge(t *testing.T) {
 					AdaptationSet: []AdaptationSet{
 						{
 							MimeType: "video/webm",
+							Id:       0,
 							Representation: []Representation{
 								{
+									Id:      0,
 									Width:   10,
 									Height:  10,
 									BaseURL: "test 2",
@@ -166,8 +170,10 @@ func TestMerge(t *testing.T) {
 						},
 						{
 							MimeType: "audio/webm",
+							Id:       1,
 							Representation: []Representation{
 								{
+									Id:      1,
 									BaseURL: "test 1",
 								},
 							},
@@ -215,8 +221,10 @@ func TestMerge(t *testing.T) {
 					AdaptationSet: []AdaptationSet{
 						{
 							MimeType: "video/webm",
+							Id:       0,
 							Representation: []Representation{
 								{
+									Id:      0,
 									Width:   10,
 									Height:  10,
 									BaseURL: "test 1",
@@ -225,8 +233,10 @@ func TestMerge(t *testing.T) {
 						},
 						{
 							MimeType: "audio/webm",
+							Id:       1,
 							Representation: []Representation{
 								{
+									Id:      1,
 									BaseURL: "test 2",
 								},
 							},
@@ -276,13 +286,16 @@ func TestMerge(t *testing.T) {
 					AdaptationSet: []AdaptationSet{
 						{
 							MimeType: "video/webm",
+							Id:       0,
 							Representation: []Representation{
 								{
+									Id:      0,
 									Width:   10,
 									Height:  10,
 									BaseURL: "test 1",
 								},
 								{
+									Id:      1,
 									Width:   10,
 									Height:  10,
 									BaseURL: "test 2",
@@ -350,18 +363,22 @@ func TestMerge(t *testing.T) {
 					AdaptationSet: []AdaptationSet{
 						{
 							MimeType: "video/webm",
+							Id:       0,
 							Representation: []Representation{
 								{
+									Id:      0,
 									Width:   10,
 									Height:  10,
 									BaseURL: "test video 1",
 								},
 								{
+									Id:      1,
 									Width:   20,
 									Height:  20,
 									BaseURL: "test video 2",
 								},
 								{
+									Id:      2,
 									Width:   30,
 									Height:  30,
 									BaseURL: "test video 3",
@@ -370,8 +387,10 @@ func TestMerge(t *testing.T) {
 						},
 						{
 							MimeType: "audio/webm",
+							Id:       1,
 							Representation: []Representation{
 								{
+									Id:      3,
 									BaseURL: "test audio 1",
 								},
 							},
