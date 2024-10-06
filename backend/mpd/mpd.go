@@ -13,7 +13,7 @@ type MPD struct {
 	MediaPresentationDuration ISO8601Duration `xml:"mediaPresentationDuration,attr"`
 	MinBufferTime             ISO8601Duration `xml:"minBufferTime,attr"`
 	Profiles                  string          `xml:"profiles,attr"`
-	Period                    []Period
+	Period                    Period
 }
 
 type Period struct {
