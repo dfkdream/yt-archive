@@ -7,24 +7,24 @@ import (
 )
 
 type MPD struct {
-	XMLName                   xml.Name `xml:"urn:mpeg:DASH:schema:MPD:2011 MPD"`
-	SchemaLocation            string   `xml:"http://www.w3.org/2001/XMLSchema-instance schemaLocation,attr"`
-	Type                      string   `xml:"type,attr"`
-	MediaPresentationDuration string   `xml:"mediaPresentationDuration,attr"`
-	MinBufferTime             string   `xml:"minBufferTime,attr"`
-	Profiles                  string   `xml:"profiles,attr"`
+	XMLName                   xml.Name        `xml:"urn:mpeg:DASH:schema:MPD:2011 MPD"`
+	SchemaLocation            string          `xml:"http://www.w3.org/2001/XMLSchema-instance schemaLocation,attr"`
+	Type                      string          `xml:"type,attr"`
+	MediaPresentationDuration ISO8601Duration `xml:"mediaPresentationDuration,attr"`
+	MinBufferTime             ISO8601Duration `xml:"minBufferTime,attr"`
+	Profiles                  string          `xml:"profiles,attr"`
 	Period                    []Period
 }
 
 type Period struct {
-	Id            string `xml:"id,attr"`
-	Start         string `xml:"start,attr"`
-	Duration      string `xml:"duration,attr"`
+	Id            int             `xml:"id,attr"`
+	Start         ISO8601Duration `xml:"start,attr"`
+	Duration      ISO8601Duration `xml:"duration,attr"`
 	AdaptationSet []AdaptationSet
 }
 
 type AdaptationSet struct {
-	Id                      string `xml:"id,attr"`
+	Id                      int    `xml:"id,attr"`
 	MimeType                string `xml:"mimeType,attr"`
 	Codecs                  string `xml:"codecs,attr"`
 	Lang                    string `xml:"lang,attr"`
@@ -32,15 +32,15 @@ type AdaptationSet struct {
 	Height                  int    `xml:"height,attr,omitempty"`
 	BitstreamSwitching      bool   `xml:"bitstreamSwitching,attr"`
 	SubsegmentAlignment     bool   `xml:"subsegmentAlignment,attr"`
-	SubsegmentStartsWithSAP string `xml:"subsegmentStartsWithSAP,attr"`
+	SubsegmentStartsWithSAP int    `xml:"subsegmentStartsWithSAP,attr"`
 	Representation          []Representation
 }
 
 type Representation struct {
-	Id          string `xml:"id,attr"`
-	Bandwidth   string `xml:"bandwidth,attr"`
-	Width       int    `xml:"width,attr,omitempty"`
-	Height      int    `xml:"height,attr,omitempty"`
+	Id          int `xml:"id,attr"`
+	Bandwidth   int `xml:"bandwidth,attr"`
+	Width       int `xml:"width,attr,omitempty"`
+	Height      int `xml:"height,attr,omitempty"`
 	BaseURL     string
 	SegmentBase SegmentBase
 }
