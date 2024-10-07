@@ -30,14 +30,14 @@
     });
 </script>
 
-<div {...$$restProps}>
-    <img src={poster} alt="poster" />
+<div class="relative" {...$$restProps}>
+    <img src={poster} alt="poster" class={"object-contain " + $$props.class} />
     <audio
         bind:this={audioElement}
         {controls}
         {playsinline}
         loop={loop ? loop : undefined}
-        class="w-full absolute bottom-0"
+        class="w-full absolute bottom-0 z-50"
     >
         <slot />
     </audio>
