@@ -1,0 +1,66 @@
+name: Build and release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build_docker_tarball:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build
+        uses: docker/build-push-action@v6
+        with:
+          load: true
+          tags: yt-archive:latest
+          platforms: linux/arm64
+
+      - name: Create tarball
+        run: |
+          docker image save yt-archive:latest | gzip > yt-archive-arm64.tar.gz
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-tarball
+          path: yt-archive-arm64.tar.gz
+
+  release:
+    needs: build_docker_tarball
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: release-tarball
+
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          draft: true
+          prerelease: false
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: yt-archive-arm64.tar.gz
+          asset_name: yt-archive-arm64.tar.gz
+          asset_content_type: application/x-gzip
