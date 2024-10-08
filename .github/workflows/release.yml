@@ -20,19 +20,15 @@ jobs:
         env:
           DOCKER_BUILD_SUMMARY: false
         with:
-          load: true
           tags: yt-archive:latest
           platforms: linux/arm64
-
-      - name: Create tarball
-        run: |
-          docker image save yt-archive:latest | gzip > yt-archive-arm64.tar.gz
+          outputs: type=oci,dest=yt-archive-arm64.tar
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: release-tarball
-          path: yt-archive-arm64.tar.gz
+          path: yt-archive-arm64.tar
 
   release:
     needs: build_docker_tarball
