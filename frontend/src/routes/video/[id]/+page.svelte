@@ -24,8 +24,13 @@
     let videoQuality = 0;
     let videoBitrateList: dashjs.BitrateInfo[] | null = null;
 
+    let startTime = 0;
+    let currentTime = startTime;
+
     let loop = false;
     let radioMode = false;
+
+    let isPlaying = false;
 
     let bitrateString = "N/A";
     function getBitrateString(
@@ -63,6 +68,10 @@
         {loop}
         bind:bufferLength
         class={mediaClass}
+        {startTime}
+        bind:currentTime
+        bind:isPlaying
+        autoplay={isPlaying}
     />
 {:else}
     <DashVideo
@@ -75,6 +84,10 @@
         bind:videoQuality
         bind:videoBitrateList
         bind:bufferLength
+        {startTime}
+        bind:currentTime
+        bind:isPlaying
+        autoplay={isPlaying}
     />
 {/if}
 
@@ -91,7 +104,13 @@
         <Toggle slot="after" bind:checked={loop} />
     </ListItem>
     <ListItem title="Radio Mode">
-        <Toggle slot="after" bind:checked={radioMode} />
+        <Toggle
+            slot="after"
+            bind:checked={radioMode}
+            onChange={() => {
+                startTime = currentTime;
+            }}
+        ></Toggle>
     </ListItem>
 </List>
 
