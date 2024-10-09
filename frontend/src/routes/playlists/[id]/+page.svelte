@@ -1,8 +1,8 @@
 <script lang="ts">
     import { PlaylistVideos } from "$lib/api/playlist.js";
-    import Tabbar from "$lib/tabbar.svelte";
     import VideoGrid from "$lib/video_grid.svelte";
-    import { Block, Navbar } from "konsta/svelte";
+    import Navbar from "$lib/navbar.svelte";
+    import { Block } from "konsta/svelte";
     import { onMount } from "svelte";
 
     export let data;
@@ -22,11 +22,8 @@
     {/if}
 </svelte:head>
 
-<Navbar
-    medium
-    transparent
-    title={(playlistVideos && playlistVideos.Title) || data.id}
-/>
+<Navbar title={(playlistVideos && playlistVideos.Title) || data.id} />
+
 {#if playlistVideos}
     <Block strong inset>
         {#if playlistVideos.Description}
@@ -53,4 +50,3 @@
     </Block>
     <VideoGrid videos={playlistVideos.Videos} showChannel />
 {/if}
-<Tabbar />

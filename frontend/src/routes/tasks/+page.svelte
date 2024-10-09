@@ -6,16 +6,10 @@
         type Task,
         type TaskRequest,
     } from "$lib/api/tasks";
-    import Tabbar from "$lib/tabbar.svelte";
     import TaskCard from "$lib/task_card.svelte";
-    import {
-        BlockTitle,
-        List,
-        ListButton,
-        ListInput,
-        Navbar,
-    } from "konsta/svelte";
+    import { BlockTitle, List, ListButton, ListInput } from "konsta/svelte";
     import { onMount } from "svelte";
+    import Navbar from "$lib/navbar.svelte";
 
     let taskRequest: TaskRequest = {
         Type: 0,
@@ -59,7 +53,7 @@
     <title>Tasks - yt-archive</title>
 </svelte:head>
 
-<Navbar medium transparent title="Tasks" />
+<Navbar title="Tasks" location="tasks" />
 
 <BlockTitle>New Task</BlockTitle>
 <List strong inset>
@@ -91,5 +85,3 @@
 {#each completedTasks as t}
     <TaskCard task={t} />
 {/each}
-
-<Tabbar location="tasks" />

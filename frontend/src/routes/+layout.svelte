@@ -11,7 +11,7 @@
 </svelte:head>
 
 <App theme="ios">
-    <Page class="max-w-5xl m-auto mb-16">
+    <Page class="max-w-5xl m-auto">
         <slot />
     </Page>
 </App>

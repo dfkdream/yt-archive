@@ -2,7 +2,7 @@
     import { type Video, VideoInfo } from "$lib/api/video";
     import DashAudio from "$lib/dash_audio.svelte";
     import DashVideo from "$lib/dash_video.svelte";
-    import Tabbar from "$lib/tabbar.svelte";
+    import Navbar from "$lib/navbar.svelte";
     import VideoCard from "$lib/video_card.svelte";
     import type dashjs from "dashjs";
     import { List, ListItem, Block, Toggle } from "konsta/svelte";
@@ -59,6 +59,8 @@
         <title>{data.id} - yt-archive</title>
     {/if}
 </svelte:head>
+
+<Navbar small />
 
 {#if radioMode}
     <DashAudio
@@ -120,5 +122,3 @@
     {/if}
     <ListItem title="Buffer length" after={bufferLength} />
 </List>
-
-<Tabbar />

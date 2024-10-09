@@ -1,8 +1,8 @@
 <script lang="ts">
     import { Playlists, type Playlist } from "$lib/api/playlist";
-    import Tabbar from "$lib/tabbar.svelte";
-    import { Block, Navbar } from "konsta/svelte";
+    import { Block } from "konsta/svelte";
     import { onMount } from "svelte";
+    import Navbar from "$lib/navbar.svelte";
 
     let playlists: Playlist[] = [];
 
@@ -15,7 +15,7 @@
     <title>Playlists - yt-archive</title>
 </svelte:head>
 
-<Navbar medium transparent title="Playlists" />
+<Navbar title="Playlists" location="playlists" />
 
 <div class="grid gap-1 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
     {#each playlists as p}
@@ -53,5 +53,3 @@
         </a>
     {/each}
 </div>
-
-<Tabbar location="playlists"></Tabbar>

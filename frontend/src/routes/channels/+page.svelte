@@ -1,8 +1,7 @@
 <script lang="ts">
-    import Tabbar from "$lib/tabbar.svelte";
     import { onMount } from "svelte";
     import { type Channel, Channels } from "$lib/api/channel";
-    import { Navbar } from "konsta/svelte";
+    import Navbar from "$lib/navbar.svelte";
     import ChannelCard from "$lib/channel_card.svelte";
 
     let channels: Channel[] = [];
@@ -16,12 +15,10 @@
     <title>Channels - yt-archive</title>
 </svelte:head>
 
-<Navbar medium transparent title="Channels" />
+<Navbar title="Channels" location="channels" />
 
 {#each channels as c}
     <a href={`/channels/${c.ID}`}>
         <ChannelCard channel={c} />
     </a>
 {/each}
-
-<Tabbar location="channels" />
