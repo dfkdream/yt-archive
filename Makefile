@@ -12,6 +12,12 @@ yt-archive: $(BACKEND_FILES)
 	cd backend &&\
 	go build -o ..
 
+standalone: dist $(BACKEND_FILES)
+	cp -r dist backend &&\
+	cd backend &&\
+	go build -tags standalone -o .. &&\
+	rm -r dist
+
 start: all
 	./yt-archive
 

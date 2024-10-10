@@ -2,13 +2,14 @@ package api
 
 import (
 	"database/sql"
+	"io/fs"
 	"net/http"
 	"os"
 
 	"github.com/gorilla/mux"
 )
 
-func New(db *sql.DB) http.Handler {
+func New(db *sql.DB, distFS fs.FS) http.Handler {
 	r := mux.NewRouter()
 
 	r.Path("/api/videos").
@@ -68,7 +69,7 @@ func New(db *sql.DB) http.Handler {
 	r.PathPrefix("/").
 		Methods(http.MethodGet).
 		Handler(&StaticSiteServer{
-			FS:       http.FS(os.DirFS("dist")),
+			FS:       http.FS(distFS),
 			Fallback: "fallback.html",
 		})
 
