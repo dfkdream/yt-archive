@@ -1,5 +1,5 @@
-BACKEND_FILES = $(shell find backend -type f -name '*')
-FRONTEND_FILES = $(shell find frontend/src frontend/static frontend/*.js* -type f -name '*')
+BACKEND_FILES := $(wildcard backend/**/*)
+FRONTEND_FILES := $(wildcard frontend/src/**/* frontend/static/**/* frontend/*.js*)
 
 .PHONY: all
 all: dist yt-archive rebuild_mpd
