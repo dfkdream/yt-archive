@@ -10,8 +10,8 @@
         List,
         ListItem,
         ListInput,
-        ListButton,
         Dialog,
+        DialogButton,
     } from "konsta/svelte";
     import { onMount } from "svelte";
     import VideoCard from "$lib/video_card.svelte";
@@ -54,24 +54,21 @@
             placeholder="New Index"
             bind:value={newIndex}
         />
-        <ListButton
-            onClick={async () => {
-                if (
-                    playlistVideos != null &&
-                    dialogVideo != null &&
-                    newIndex != undefined
-                ) {
-                    await UpdateIndex(
-                        playlistVideos.ID,
-                        dialogVideo.ID,
-                        newIndex,
-                    );
-                    playlistVideos = await PlaylistVideos(data.id);
-                }
-                dialogOpened = false;
-            }}>Update Index</ListButton
-        >
     </List>
+    <DialogButton
+        slot="buttons"
+        onClick={async () => {
+            if (
+                playlistVideos != null &&
+                dialogVideo != null &&
+                newIndex != undefined
+            ) {
+                await UpdateIndex(playlistVideos.ID, dialogVideo.ID, newIndex);
+                playlistVideos = await PlaylistVideos(data.id);
+            }
+            dialogOpened = false;
+        }}>Update Index</DialogButton
+    >
 </Dialog>
 
 {#if playlistVideos}
@@ -103,7 +100,8 @@
         {#each playlistVideos.Videos as v}
             <VideoCard video={v} showChannel showPoster needStyle>
                 <button
-                    class="bg-black text-white h-8 w-8 p-1 rounded opacity-50 absolute top-2 right-2 z-20"
+                    class="bg-black text-white h-8 w-8 p-1 rounded opacity-50 hover:opacity-70 absolute top-2 right-2 z-20"
+                    title="Update index"
                     on:click={() => {
                         dialogVideo = v;
                         newIndex = undefined;
