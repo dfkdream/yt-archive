@@ -2,7 +2,7 @@ BACKEND_FILES := $(wildcard backend/**/*)
 FRONTEND_FILES := $(wildcard frontend/src/**/* frontend/static/**/* frontend/*.js*)
 
 .PHONY: all
-all: dist yt-archive rebuild_mpd
+all: dist yt-archive
 
 dist: $(FRONTEND_FILES)
 	cd frontend &&\
@@ -12,10 +12,6 @@ dist: $(FRONTEND_FILES)
 yt-archive: $(BACKEND_FILES)
 	cd backend &&\
 	go build -o ..
-
-rebuild_mpd: yt-archive
-	cd backend &&\
-	go build -o .. ./cmd/rebuild_mpd
 
 .PHONY: standalone
 standalone: dist $(BACKEND_FILES)
@@ -37,5 +33,4 @@ dev: yt-archive
 .PHONY: clean
 clean:
 	rm yt-archive
-	rm rebuild_mpd
 	rm -r dist
