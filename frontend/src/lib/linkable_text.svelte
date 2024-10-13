@@ -8,8 +8,12 @@
     onMount(() => {
         let text = div.innerText;
 
-        text = text.replaceAll("<", "&lt");
-        text = text.replaceAll(">", "&gt");
+        text = text
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#x27;");
 
         if (renderExternalLinks) {
             text = text.replaceAll(
