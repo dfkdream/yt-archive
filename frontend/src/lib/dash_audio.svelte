@@ -42,6 +42,8 @@
             isPlaying = false;
         });
     });
+
+    $: player?.seek(startTime);
 </script>
 
 <div class="relative" {...$$restProps}>

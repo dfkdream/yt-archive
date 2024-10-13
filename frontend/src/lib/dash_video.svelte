@@ -48,6 +48,8 @@
             isPlaying = false;
         });
     });
+
+    $: player?.seek(startTime);
 </script>
 
 <!-- svelte-ignore a11y-media-has-caption -->

@@ -25,7 +25,7 @@
     let videoQuality = 0;
     let videoBitrateList: dashjs.BitrateInfo[] | null = null;
 
-    let startTime = 0;
+    let startTime = data.startTime;
     let currentTime = startTime;
 
     let loop = false;
@@ -51,6 +51,7 @@
     }
 
     $: bitrateString = getBitrateString(videoBitrateList, videoQuality);
+    $: startTime = data.startTime;
 </script>
 
 <svelte:head>
