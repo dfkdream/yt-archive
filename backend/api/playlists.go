@@ -102,7 +102,7 @@ func (p playlistVideosHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 	left join videos as v
 	on pv.videoId=v.id	
 	where p.id=?
-	order by pv.sortIndex desc
+	order by pv.sortIndex asc, v.timestamp asc
 	`
 
 	rows, err := p.DB.Query(query, id)
