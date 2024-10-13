@@ -20,8 +20,12 @@ export async function Playlists() {
     });
 }
 
+export interface IndexedVideo extends Video {
+    Index: number;
+}
+
 export interface PlaylistVideos extends Playlist {
-    Videos: Video[];
+    Videos: IndexedVideo[];
 }
 
 export async function PlaylistVideos(id: string) {
@@ -30,4 +34,17 @@ export async function PlaylistVideos(id: string) {
     json.Timestamp = new Date(json.Timestamp);
     json.Videos = mapTimestamp(json.Videos);
     return json;
+}
+
+export async function UpdateIndex(pid: string, vid: string, i: number){
+    let resp = await fetch(`/api/playlists/${pid}/video/${vid}/index`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: i.toString(),
+    })
+
+    let newIndex: number = await resp.json();
+    return newIndex;
 }

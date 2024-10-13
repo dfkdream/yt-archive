@@ -1,4 +1,4 @@
-export type Video = {
+export interface Video {
     ID: string;
     Title: string;
     Description: string;
@@ -26,7 +26,7 @@ export async function VideoInfo(id: string) {
     return json;
 }
 
-export function mapTimestamp(v: Video[]) {
+export function mapTimestamp <T extends Video>(v: T[]) {
     return v.map((v) => {
         v.Timestamp = new Date(v.Timestamp);
         return v;

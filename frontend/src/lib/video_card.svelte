@@ -12,6 +12,7 @@
 </script>
 
 <Block strong inset class={needStyle ? "!my-1 md:!my-4" : ""}>
+    <slot />
     {#if showPoster}
         <a {href}>
             <div class="relative">
