@@ -8,6 +8,9 @@
     onMount(() => {
         let text = div.innerText;
 
+        text = text.replaceAll("<", "&lt");
+        text = text.replaceAll(">", "&gt");
+
         if (renderExternalLinks) {
             text = text.replaceAll(
                 /\b((https?|ftp):\/\/[-\w@:%_\+.~#?&//=]*[-\w@:%_\+~#?&//=])\b/g,
@@ -15,7 +18,7 @@
             );
         }
 
-        text = text.replaceAll(/(@.+)/g, '<a href="/channels/$1">$1</a>');
+        text = text.replaceAll(/(@\w+)/g, '<a href="/channels/$1">$1</a>');
         const matches = text.matchAll(/\b([0-9]{1,2}):([0-5][0-9])\b/g);
         for (const m of matches) {
             const sec = parseInt(m[1]) * 60 + parseInt(m[2]);
