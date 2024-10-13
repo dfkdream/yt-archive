@@ -2,6 +2,7 @@
     import { type Video, VideoInfo } from "$lib/api/video";
     import DashAudio from "$lib/dash_audio.svelte";
     import DashVideo from "$lib/dash_video.svelte";
+    import LinkableText from "$lib/linkable_text.svelte";
     import Navbar from "$lib/navbar.svelte";
     import VideoCard from "$lib/video_card.svelte";
     import type dashjs from "dashjs";
@@ -96,8 +97,9 @@
 {#if video}
     <VideoCard {video} showChannel fullTitle />
     <Block strong inset>
-        <pre
-            class="font-sans overflow-x-scroll">{video.Description.trim()}</pre>
+        <LinkableText class="overflow-x-scroll text-nowrap"
+            >{video.Description.trim()}</LinkableText
+        >
     </Block>
 {/if}
 
