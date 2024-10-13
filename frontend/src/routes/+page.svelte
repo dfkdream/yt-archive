@@ -2,7 +2,8 @@
     import Navbar from "$lib/navbar.svelte";
     import { type Video, Videos } from "$lib/api/video";
     import { onMount } from "svelte";
-    import VideoGrid from "$lib/video_grid.svelte";
+    import Grid from "$lib/grid.svelte";
+    import VideoCard from "$lib/video_card.svelte";
 
     let videos: Video[] = [];
 
@@ -16,4 +17,8 @@
 </svelte:head>
 
 <Navbar location="home" />
-<VideoGrid {videos} showChannel />
+<Grid>
+    {#each videos as v}
+        <VideoCard video={v} showPoster showChannel needStyle />
+    {/each}
+</Grid>

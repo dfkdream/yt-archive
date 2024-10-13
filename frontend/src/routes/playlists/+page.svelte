@@ -3,6 +3,7 @@
     import { Block } from "konsta/svelte";
     import { onMount } from "svelte";
     import Navbar from "$lib/navbar.svelte";
+    import Grid from "$lib/grid.svelte";
 
     let playlists: Playlist[] = [];
 
@@ -17,7 +18,7 @@
 
 <Navbar title="Playlists" location="playlists" />
 
-<div class="grid gap-1 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+<Grid>
     {#each playlists as p}
         <a href={`/playlists/${p.ID}/`}>
             <Block strong inset class="!my-1 md:!my-4">
@@ -52,4 +53,4 @@
             </Block>
         </a>
     {/each}
-</div>
+</Grid>

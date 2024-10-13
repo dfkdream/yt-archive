@@ -1,9 +1,10 @@
 <script lang="ts">
     import { PlaylistVideos } from "$lib/api/playlist.js";
-    import VideoGrid from "$lib/video_grid.svelte";
     import Navbar from "$lib/navbar.svelte";
     import { Block } from "konsta/svelte";
     import { onMount } from "svelte";
+    import VideoCard from "$lib/video_card.svelte";
+    import Grid from "$lib/grid.svelte";
 
     export let data;
 
@@ -48,5 +49,10 @@
             </span>
         </a>
     </Block>
-    <VideoGrid videos={playlistVideos.Videos} showChannel />
+
+    <Grid>
+        {#each playlistVideos.Videos as v}
+            <VideoCard video={v} showChannel showPoster needStyle />
+        {/each}
+    </Grid>
 {/if}
