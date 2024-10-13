@@ -25,7 +25,7 @@
 <Navbar title={(playlistVideos && playlistVideos.Title) || data.id} />
 
 {#if playlistVideos}
-    <Block strong inset>
+    <Block strong inset class="!my-4">
         {#if playlistVideos.Description}
             <pre
                 class="font-sans overflow-y-scroll">{playlistVideos.Description.trim()}</pre>
@@ -41,7 +41,7 @@
             <span class="text-sm mx-2">
                 {playlistVideos.Owner}
                 <br />
-                Last modified: {playlistVideos.Timestamp.toLocaleString([], {
+                {playlistVideos.Timestamp.toLocaleString([], {
                     dateStyle: "medium",
                     timeStyle: "medium",
                 })}
