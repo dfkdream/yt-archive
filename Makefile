@@ -1,4 +1,7 @@
-BACKEND_FILES := $(wildcard backend/**/*)
+COMMON_BACKEND_FILES := $(wildcard backend/go.* backend/**/*.go)
+
+BACKEND_FILES := $(wildcard backend/cmd/yt-archive/*.go) $(COMMON_BACKEND_FILES)
+
 FRONTEND_FILES := $(wildcard frontend/src/**/* frontend/static/**/* frontend/*.js*)
 
 .PHONY: all
@@ -11,14 +14,14 @@ dist: $(FRONTEND_FILES)
 
 yt-archive: $(BACKEND_FILES)
 	cd backend &&\
-	go build -o ..
+	go build -o .. ./cmd/yt-archive
 
 .PHONY: standalone
 standalone: dist $(BACKEND_FILES)
-	cp -r dist backend &&\
+	cp -r dist backend/cmd/yt-archive &&\
 	cd backend &&\
-	go build -tags standalone -o .. &&\
-	rm -r dist
+	go build -tags standalone -o .. ./cmd/yt-archive &&\
+	rm -r cmd/yt-archive/dist
 
 .PHONY: start
 start: all
