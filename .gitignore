@@ -5,6 +5,7 @@
 # Runtime-generated files
 /channels
 /videos
+/database
 *.db*
 *.webm
 *.mpd
