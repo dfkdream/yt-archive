@@ -80,7 +80,7 @@
         {/if}
         <a href={`/channels/${playlistVideos.Owner}`} class="flex items-center">
             <img
-                src={`/api/channels/${playlistVideos.Owner}/${playlistVideos.OwnerThumbnail}`}
+                src={`/api/thumbnails/${playlistVideos.OwnerThumbnail}`}
                 alt={playlistVideos.Owner}
                 width="45px"
                 class="rounded-full"

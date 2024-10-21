@@ -19,7 +19,7 @@
     });
 
     let manifest = `/api/videos/${data.id}/${data.id}.mpd`;
-    let poster = `/api/videos/${data.id}/${data.id}.webp`;
+    let poster = `/api/thumbnails/${data.id}.webp`;
 
     let bufferLength = 0;
     let videoQuality = 0;

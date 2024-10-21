@@ -24,7 +24,7 @@
             <Block strong inset class="!my-1 md:!my-4">
                 <img
                     class="mb-2"
-                    src={`/api/videos/${p.ThumbnailVideo}/${p.Thumbnail}`}
+                    src={`/api/thumbnails/${p.Thumbnail}`}
                     alt={p.Title}
                 />
 
@@ -36,7 +36,7 @@
 
                 <a href={`/channels/${p.Owner}`} class="flex items-center">
                     <img
-                        src={`/api/channels/${p.Owner}/${p.OwnerThumbnail}`}
+                        src={`/api/thumbnails/${p.OwnerThumbnail}`}
                         alt={p.Owner}
                         width="45px"
                         class="rounded-full"

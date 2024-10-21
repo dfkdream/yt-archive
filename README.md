@@ -40,6 +40,6 @@ docker build --tag yt-archive .
 
 # Directory Structure
 The following directories are used by the program:
-* `videos/`: Stores WebM videos and their corresponding thumbnail images.
-* `channels/`: Stores channel avatar images.
+* `videos/`: Stores WebM videos.
+* `thumbnails/`: Stores video thumbnails and channel avatar images.
 * `database/`: Contains metadata (channels, videos, and playlists) in SQLite format.

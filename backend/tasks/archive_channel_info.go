@@ -66,13 +66,7 @@ func (a ArchiveChannelInfoHandler) Handler(task *taskq.Task) error {
 		return err
 	}
 
-	destPath := filepath.Join("channels", channelID)
-	err = os.MkdirAll(destPath, os.FileMode(0o700))
-	if err != nil {
-		return err
-	}
-
-	thumbnail, err := copyThumbnail(tempDir, destPath)
+	thumbnail, err := copyThumbnail(tempDir)
 	if err != nil {
 		return err
 	}

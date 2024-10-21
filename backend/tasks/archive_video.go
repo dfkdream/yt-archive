@@ -84,18 +84,18 @@ func (a ArchiveVideoHandler) Handler(task *taskq.Task) error {
 		return err
 	}
 
-	destPath := filepath.Join("videos", videoID)
-	err = os.MkdirAll(destPath, os.FileMode(0o700))
-	if err != nil {
-		return err
-	}
-
-	thumbnail, err := copyThumbnail(tempDir, destPath)
+	thumbnail, err := copyThumbnail(tempDir)
 	if err != nil {
 		return err
 	}
 
 	slog.Info("downloaded thumbnail", "filename", thumbnail)
+
+	destPath := filepath.Join("videos", videoID)
+	err = os.MkdirAll(destPath, os.FileMode(0o700))
+	if err != nil {
+		return err
+	}
 
 	metadata, err := parseVideoMetadata(filepath.Join(tempDir, videoID+".info.json"))
 	if err != nil {
@@ -256,7 +256,9 @@ func parseVideoMetadata(path string) (*videoMetadata, error) {
 
 const thumbnailExtensions = ".webp|.jpg|.png"
 
-func copyThumbnail(path string, dest string) (string, error) {
+func copyThumbnail(path string) (string, error) {
+	dest := "thumbnails"
+
 	files, err := os.ReadDir(path)
 	if err != nil {
 		return "", err
@@ -272,6 +274,11 @@ func copyThumbnail(path string, dest string) (string, error) {
 
 	if filename == "" {
 		return "", errors.New("could not find thumbnail in directory " + path)
+	}
+
+	err = os.MkdirAll(dest, os.FileMode(0o700))
+	if err != nil {
+		return "", err
 	}
 
 	err = copyFile(filepath.Join(path, filename), filepath.Join(dest, filename))

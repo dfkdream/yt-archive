@@ -18,7 +18,7 @@
             <div class="relative">
                 <img
                     class="mb-2"
-                    src={`/api/videos/${video.ID}/${video.Thumbnail}`}
+                    src={`/api/thumbnails/${video.Thumbnail}`}
                     alt={video.Title}
                 />
                 <span
@@ -41,7 +41,7 @@
     {#if showChannel}
         <a href={`/channels/${video.Owner}`} class="flex items-center">
             <img
-                src={`/api/channels/${video.Owner}/${video.OwnerThumbnail}`}
+                src={`/api/thumbnails/${video.OwnerThumbnail}`}
                 alt={video.Owner}
                 width="45px"
                 class="rounded-full"

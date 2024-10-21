@@ -3,7 +3,7 @@
 /yt-archive
 
 # Runtime-generated files
-/channels
+/thumbnails
 /videos
 /database
 *.db*

@@ -7,7 +7,7 @@
 
 <Block strong inset class="flex items-center !my-4">
     <img
-        src={`/api/channels/${channel.ID}/${channel.Thumbnail}`}
+        src={`/api/thumbnails/${channel.Thumbnail}`}
         alt={channel.Title}
         width="45px"
         class="rounded-full"

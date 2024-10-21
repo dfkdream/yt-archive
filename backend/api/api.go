@@ -34,10 +34,10 @@ func New(db *sql.DB, distFS fs.FS) http.Handler {
 		Methods(http.MethodGet).
 		Handler(channelVideosHandler{DB: db})
 
-	r.PathPrefix("/api/channels/").
+	r.PathPrefix("/api/thumbnails/").
 		Methods(http.MethodGet).
-		Handler(http.StripPrefix("/api/channels/", &FileServer{
-			FS: http.FS(os.DirFS("channels")),
+		Handler(http.StripPrefix("/api/thumbnails/", &FileServer{
+			FS: http.FS(os.DirFS("thumbnails")),
 		}))
 
 	r.Path("/api/playlists").
