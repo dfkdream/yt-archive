@@ -7,7 +7,7 @@ export interface Video {
     Owner: string;
     Thumbnail: string;
     OwnerThumbnail: string;
-};
+}
 
 export async function Videos() {
     let resp = await fetch("/api/videos");
@@ -26,7 +26,7 @@ export async function VideoInfo(id: string) {
     return json;
 }
 
-export function mapTimestamp <T extends Video>(v: T[]) {
+export function mapTimestamp<T extends Video>(v: T[]) {
     return v.map((v) => {
         v.Timestamp = new Date(v.Timestamp);
         return v;

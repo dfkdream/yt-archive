@@ -36,14 +36,14 @@ export async function PlaylistVideos(id: string) {
     return json;
 }
 
-export async function UpdateIndex(pid: string, vid: string, i: number){
+export async function UpdateIndex(pid: string, vid: string, i: number) {
     let resp = await fetch(`/api/playlists/${pid}/video/${vid}/index`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
         body: i.toString(),
-    })
+    });
 
     let newIndex: number = await resp.json();
     return newIndex;
