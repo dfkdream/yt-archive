@@ -2,7 +2,7 @@ COMMON_BACKEND_FILES := $(wildcard backend/go.* backend/**/*.go)
 
 BACKEND_FILES := $(wildcard backend/cmd/yt-archive/*.go) $(COMMON_BACKEND_FILES)
 
-FRONTEND_FILES := $(wildcard frontend/src/**/* frontend/static/**/* frontend/*.js*)
+FRONTEND_FILES := $(wildcard frontend/src/* frontend/src/**/* frontend/static/**/* frontend/*.js*)
 
 .PHONY: all
 all: dist yt-archive
