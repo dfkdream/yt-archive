@@ -18,7 +18,7 @@
 <Navbar title="Channels" location="channels" />
 
 {#each channels as c}
-    <a href={`/channels/${c.ID}`}>
+    <a href={`/channel/?id=${c.ID}`}>
         <ChannelCard channel={c} />
     </a>
 {/each}

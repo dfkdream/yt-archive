@@ -8,7 +8,7 @@
     export let needStyle = false;
     export let video: Video;
 
-    let href = `/video/${video.ID}`;
+    let href = `/video/?id=${video.ID}`;
 </script>
 
 <Block strong inset class={needStyle ? "!my-1 md:!my-4" : ""}>
@@ -39,7 +39,7 @@
     </a>
 
     {#if showChannel}
-        <a href={`/channels/${video.Owner}`} class="flex items-center">
+        <a href={`/channel/?id=${video.Owner}`} class="flex items-center">
             <img
                 src={`/api/thumbnails/${video.OwnerThumbnail}`}
                 alt={video.Owner}

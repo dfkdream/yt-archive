@@ -20,7 +20,7 @@
 
 <Grid>
     {#each playlists as p}
-        <a href={`/playlists/${p.ID}/`}>
+        <a href={`/playlist/?id=${p.ID}`}>
             <Block strong inset class="!my-1 md:!my-4">
                 <img
                     class="mb-2"
@@ -34,7 +34,7 @@
                     {p.Title}
                 </h2>
 
-                <a href={`/channels/${p.Owner}`} class="flex items-center">
+                <a href={`/channel/?id=${p.Owner}`} class="flex items-center">
                     <img
                         src={`/api/thumbnails/${p.OwnerThumbnail}`}
                         alt={p.Owner}

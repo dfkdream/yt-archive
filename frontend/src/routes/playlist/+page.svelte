@@ -78,7 +78,10 @@
                 class="font-sans overflow-y-scroll">{playlistVideos.Description.trim()}</pre>
             <br />
         {/if}
-        <a href={`/channels/${playlistVideos.Owner}`} class="flex items-center">
+        <a
+            href={`/channel/?id=${playlistVideos.Owner}`}
+            class="flex items-center"
+        >
             <img
                 src={`/api/thumbnails/${playlistVideos.OwnerThumbnail}`}
                 alt={playlistVideos.Owner}
