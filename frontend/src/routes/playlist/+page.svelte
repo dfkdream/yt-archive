@@ -79,7 +79,7 @@
             <br />
         {/if}
         <a
-            href={`/channel/?id=${playlistVideos.Owner}`}
+            href={`/channel?id=${playlistVideos.Owner}`}
             class="flex items-center"
         >
             <img
