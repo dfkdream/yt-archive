@@ -14,6 +14,8 @@ type StaticSiteServer struct {
 }
 
 func (s *StaticSiteServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("cache-control", "private, max-age=86400")
+
 	path := filepath.Clean(r.URL.Path)
 	slog.Debug("StaticSiteServer request", "path", path)
 
