@@ -1,15 +1,11 @@
 <script lang="ts">
     import Navbar from "$lib/navbar.svelte";
-    import { type Video, Videos } from "$lib/api/video";
-    import { onMount } from "svelte";
     import Grid from "$lib/grid.svelte";
     import VideoCard from "$lib/video_card.svelte";
 
-    let videos: Video[] = [];
+    export let data;
 
-    onMount(async () => {
-        videos = await Videos();
-    });
+    let videos = data.videos;
 </script>
 
 <svelte:head>

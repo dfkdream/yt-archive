@@ -13,10 +13,7 @@
 
     export let data;
 
-    let video: Video;
-    onMount(async () => {
-        video = await VideoInfo(data.id);
-    });
+    let video = data.video;
 
     let manifest = `/api/videos/${data.id}/${data.id}.mpd`;
     let poster = `/api/thumbnails/${data.id}.webp`;
@@ -55,11 +52,7 @@
 </script>
 
 <svelte:head>
-    {#if video}
-        <title>{video.Title} - yt-archive</title>
-    {:else}
-        <title>{data.id} - yt-archive</title>
-    {/if}
+    <title>{video.Title} - yt-archive</title>
 </svelte:head>
 
 <Navbar small />
@@ -95,14 +88,12 @@
     />
 {/if}
 
-{#if video}
-    <VideoCard {video} showChannel fullTitle />
-    <Block strong inset>
-        <LinkableText class="overflow-x-scroll text-nowrap"
-            >{video.Description.trim()}</LinkableText
-        >
-    </Block>
-{/if}
+<VideoCard {video} showChannel fullTitle />
+<Block strong inset>
+    <LinkableText class="overflow-x-scroll text-nowrap"
+        >{video.Description.trim()}</LinkableText
+    >
+</Block>
 
 <List strong inset>
     <ListItem title="Loop">

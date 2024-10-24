@@ -3,13 +3,13 @@
         checkID,
         SubmitTask,
         Tasks,
-        type Task,
         type TaskRequest,
     } from "$lib/api/tasks";
     import TaskCard from "$lib/task_card.svelte";
     import { BlockTitle, List, ListButton, ListInput } from "konsta/svelte";
-    import { onMount } from "svelte";
     import Navbar from "$lib/navbar.svelte";
+
+    export let data;
 
     let taskRequest: TaskRequest = {
         Type: 0,
@@ -24,7 +24,7 @@
         );
     }
 
-    let tasks: Task[] = [];
+    let tasks = data.tasks;
 
     $: queuedTasks = tasks.filter((t) => t.Status == 0);
     $: completedTasks = tasks.filter((t) => t.Status > 1);
@@ -43,10 +43,6 @@
 
         location.hash = id;
     }
-
-    onMount(async () => {
-        tasks = await Tasks();
-    });
 </script>
 
 <svelte:head>

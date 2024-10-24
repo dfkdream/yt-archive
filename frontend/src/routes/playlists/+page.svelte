@@ -1,15 +1,11 @@
 <script lang="ts">
-    import { Playlists, type Playlist } from "$lib/api/playlist";
     import { Block } from "konsta/svelte";
-    import { onMount } from "svelte";
     import Navbar from "$lib/navbar.svelte";
     import Grid from "$lib/grid.svelte";
 
-    let playlists: Playlist[] = [];
+    export let data;
 
-    onMount(async () => {
-        playlists = await Playlists();
-    });
+    let playlists = data.playlists;
 </script>
 
 <svelte:head>

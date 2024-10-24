@@ -1,14 +1,10 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import { type Channel, Channels } from "$lib/api/channel";
     import Navbar from "$lib/navbar.svelte";
     import ChannelCard from "$lib/channel_card.svelte";
 
-    let channels: Channel[] = [];
+    export let data;
 
-    onMount(async () => {
-        channels = await Channels();
-    });
+    let channels = data.channels;
 </script>
 
 <svelte:head>
