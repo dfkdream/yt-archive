@@ -7,7 +7,6 @@
     import VideoCard from "$lib/video_card.svelte";
     import type dashjs from "dashjs";
     import { List, ListItem, Block, Toggle } from "konsta/svelte";
-    import { onMount } from "svelte";
 
     let mediaClass = "m-auto w-full sticky top-0 z-50 max-h-[60vh] bg-black";
 
@@ -90,9 +89,11 @@
 
 <VideoCard {video} showChannel fullTitle />
 <Block strong inset>
-    <LinkableText class="overflow-x-scroll text-nowrap"
-        >{video.Description.trim()}</LinkableText
-    >
+    <LinkableText
+        class="overflow-x-scroll text-nowrap"
+        text={video.Description.trim()}
+        videoId={video.ID}
+    />
 </Block>
 
 <List strong inset>
