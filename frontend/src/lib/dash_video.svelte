@@ -23,6 +23,8 @@
 
     export let isPlaying: boolean = false;
 
+    export let onPlaybackEnded: (() => void) | null = null;
+
     let player: dashjs.MediaPlayerClass | null = null;
 
     onMount(async () => {
@@ -46,6 +48,10 @@
 
         player.on("playbackPaused", () => {
             isPlaying = false;
+        });
+
+        player.on("playbackEnded", () => {
+            onPlaybackEnded && onPlaybackEnded();
         });
     });
 

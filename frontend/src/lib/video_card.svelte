@@ -7,8 +7,9 @@
     export let fullTitle = false;
     export let needStyle = false;
     export let video: Video;
+    export let listID: string | null = null;
 
-    let href = `/video?id=${video.ID}`;
+    $: href = `/video?id=${video.ID}` + (listID ? `&list=${listID}` : "");
 </script>
 
 <Block strong inset class={needStyle ? "!my-1 md:!my-4" : ""}>

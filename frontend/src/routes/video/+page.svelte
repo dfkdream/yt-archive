@@ -1,21 +1,20 @@
 <script lang="ts">
-    import { type Video, VideoInfo } from "$lib/api/video";
+    import { goto } from "$app/navigation";
     import DashAudio from "$lib/dash_audio.svelte";
     import DashVideo from "$lib/dash_video.svelte";
     import LinkableText from "$lib/linkable_text.svelte";
     import Navbar from "$lib/navbar.svelte";
     import VideoCard from "$lib/video_card.svelte";
     import type dashjs from "dashjs";
-    import { List, ListItem, Block, Toggle } from "konsta/svelte";
+    import { List, ListItem, Block, Toggle, BlockTitle } from "konsta/svelte";
 
     let mediaClass = "m-auto w-full sticky top-0 z-50 max-h-[60vh] bg-black";
 
     export let data;
 
-    let video = data.video;
-
-    let manifest = `/api/videos/${data.id}/${data.id}.mpd`;
-    let poster = `/api/thumbnails/${data.id}.webp`;
+    $: video = data.video;
+    $: manifest = `/api/videos/${data.id}/${data.id}.mpd`;
+    $: poster = `/api/thumbnails/${data.id}.webp`;
 
     let bufferLength = 0;
     let videoQuality = 0;
@@ -26,8 +25,16 @@
 
     let loop = false;
     let radioMode = false;
+    let autoplay = false;
 
     let isPlaying = false;
+
+    function nextVideo() {
+        if (!autoplay) return;
+        if (!data.videoAfter) return;
+        isPlaying = true;
+        goto(`?id=${data.videoAfter.ID}&list=${data.playlistID}`);
+    }
 
     let bitrateString = "N/A";
     function getBitrateString(
@@ -56,36 +63,40 @@
 
 <Navbar small />
 
-{#if radioMode}
-    <DashAudio
-        {manifest}
-        {poster}
-        controls
-        {loop}
-        bind:bufferLength
-        class={mediaClass}
-        {startTime}
-        bind:currentTime
-        bind:isPlaying
-        autoplay={isPlaying}
-    />
-{:else}
-    <DashVideo
-        {manifest}
-        {poster}
-        controls
-        playsinline
-        {loop}
-        class={mediaClass}
-        bind:videoQuality
-        bind:videoBitrateList
-        bind:bufferLength
-        {startTime}
-        bind:currentTime
-        bind:isPlaying
-        autoplay={isPlaying}
-    />
-{/if}
+{#key video.ID}
+    {#if radioMode}
+        <DashAudio
+            {manifest}
+            {poster}
+            controls
+            {loop}
+            bind:bufferLength
+            class={mediaClass}
+            {startTime}
+            bind:currentTime
+            bind:isPlaying
+            autoplay={isPlaying}
+            onPlaybackEnded={nextVideo}
+        />
+    {:else}
+        <DashVideo
+            {manifest}
+            {poster}
+            controls
+            playsinline
+            {loop}
+            class={mediaClass}
+            bind:videoQuality
+            bind:videoBitrateList
+            bind:bufferLength
+            {startTime}
+            bind:currentTime
+            bind:isPlaying
+            autoplay={isPlaying}
+            onPlaybackEnded={nextVideo}
+        />
+    {/if}
+{/key}
 
 <VideoCard {video} showChannel fullTitle />
 <Block strong inset>
@@ -109,7 +120,22 @@
             }}
         ></Toggle>
     </ListItem>
+    {#if data.playlistID}
+        <ListItem title="Autoplay">
+            <Toggle slot="after" bind:checked={autoplay} />
+        </ListItem>
+    {/if}
 </List>
+
+{#if data.videoBefore}
+    <BlockTitle>Previous</BlockTitle>
+    <VideoCard video={data.videoBefore} listID={data.playlistID} showChannel />
+{/if}
+
+{#if data.videoAfter}
+    <BlockTitle>Next</BlockTitle>
+    <VideoCard video={data.videoAfter} listID={data.playlistID} showChannel />
+{/if}
 
 <List strong inset>
     {#if !radioMode}

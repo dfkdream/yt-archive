@@ -88,7 +88,7 @@
 
 <Grid>
     {#each playlistVideos.Videos as v}
-        <VideoCard video={v} showChannel showPoster needStyle>
+        <VideoCard video={v} listID={data.id} showChannel showPoster needStyle>
             <button
                 class="bg-black text-white h-8 w-8 p-1 rounded opacity-50 hover:opacity-70 absolute top-2 right-2 z-20"
                 title="Update index"
