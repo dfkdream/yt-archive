@@ -1,3 +1,5 @@
+import { isValidPlaylistID, isValidVideoID } from "./validation";
+
 export const typeVideo = 0;
 export const typePlaylist = 1;
 
@@ -59,9 +61,9 @@ export function checkID(id: string): [string, string, 0 | 1] {
 
     let type: 0 | 1;
 
-    if (/^[A-Za-z0-9_-]{11}$/.test(id)) {
+    if (isValidVideoID(id)) {
         type = typeVideo;
-    } else if (/^PL[A-Za-z0-9_-]{32}$/.test(id)) {
+    } else if (isValidPlaylistID(id)) {
         type = typePlaylist;
     } else {
         return ["Invalid ID/URL", id, 0];
