@@ -11,8 +11,8 @@ export interface Playlist {
     Thumbnail: string;
 }
 
-export async function Playlists() {
-    let resp = await fetch("/api/playlists");
+export async function Playlists(f = fetch) {
+    let resp = await f("/api/playlists");
     let json: Playlist[] = await resp.json();
     return json.map((v) => {
         v.Timestamp = new Date(v.Timestamp);
@@ -28,16 +28,21 @@ export interface PlaylistVideos extends Playlist {
     Videos: IndexedVideo[];
 }
 
-export async function PlaylistVideos(id: string) {
-    let resp = await fetch(`/api/playlists/${id}`);
+export async function PlaylistVideos(id: string, f = fetch) {
+    let resp = await f(`/api/playlists/${id}`);
     let json: PlaylistVideos = await resp.json();
     json.Timestamp = new Date(json.Timestamp);
     json.Videos = mapTimestamp(json.Videos);
     return json;
 }
 
-export async function UpdateIndex(pid: string, vid: string, i: number) {
-    let resp = await fetch(`/api/playlists/${pid}/video/${vid}/index`, {
+export async function UpdateIndex(
+    pid: string,
+    vid: string,
+    i: number,
+    f = fetch,
+) {
+    let resp = await f(`/api/playlists/${pid}/video/${vid}/index`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

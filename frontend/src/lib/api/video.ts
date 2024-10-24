@@ -9,8 +9,8 @@ export interface Video {
     OwnerThumbnail: string;
 }
 
-export async function Videos() {
-    let resp = await fetch("/api/videos");
+export async function Videos(f = fetch) {
+    let resp = await f("/api/videos");
     let json: Video[] = await resp.json();
     json = json.map((v) => {
         v.Timestamp = new Date(v.Timestamp);
@@ -19,8 +19,8 @@ export async function Videos() {
     return json;
 }
 
-export async function VideoInfo(id: string) {
-    let resp = await fetch(`/api/videos/${id}`);
+export async function VideoInfo(id: string, f = fetch) {
+    let resp = await f(`/api/videos/${id}`);
     let json: Video = await resp.json();
     json.Timestamp = new Date(json.Timestamp);
     return json;

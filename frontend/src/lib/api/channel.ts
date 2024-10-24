@@ -7,8 +7,8 @@ export interface Channel {
     Thumbnail: string;
 }
 
-export async function Channels() {
-    let resp = await fetch("/api/channels");
+export async function Channels(f = fetch) {
+    let resp = await f("/api/channels");
     let json: Channel[] = await resp.json();
     return json;
 }
@@ -17,8 +17,8 @@ export interface ChannelVideos extends Channel {
     Videos: Video[];
 }
 
-export async function ChannelVideos(id: string) {
-    let resp = await fetch(`/api/channels/${id}`);
+export async function ChannelVideos(id: string, f = fetch) {
+    let resp = await f(`/api/channels/${id}`);
     let json: ChannelVideos = await resp.json();
     json.Videos = mapTimestamp(json.Videos);
     return json;

@@ -1,13 +1,13 @@
 import { VideoInfo } from "$lib/api/video.js";
 import { error } from "@sveltejs/kit";
 
-export async function load({ url }) {
+export async function load({ url, fetch }) {
     const id = url.searchParams.get("id");
     if (!id) {
         error(400, "required paramter id not provided");
     }
 
-    const video = await VideoInfo(id);
+    const video = await VideoInfo(id, fetch);
 
     return {
         id,

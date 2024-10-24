@@ -6,8 +6,8 @@ export type TaskRequest = {
     ID: string;
 };
 
-export async function SubmitTask(t: TaskRequest) {
-    let resp = await fetch("/api/tasks", {
+export async function SubmitTask(t: TaskRequest, f = fetch) {
+    let resp = await f("/api/tasks", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -79,8 +79,8 @@ export type Task = {
     Payload: string;
 };
 
-export async function Tasks() {
-    let resp = await fetch("/api/tasks");
+export async function Tasks(f = fetch) {
+    let resp = await f("/api/tasks");
     let task: Task[] = await resp.json();
     return task;
 }
