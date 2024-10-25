@@ -1,6 +1,6 @@
 <script lang="ts">
     import { Block } from "konsta/svelte";
-    import type { Channel } from "./api/channel";
+    import type { Channel } from "../api/channel";
 
     export let channel: Channel;
 </script>

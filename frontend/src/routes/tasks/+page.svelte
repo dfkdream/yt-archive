@@ -5,9 +5,9 @@
         Tasks,
         type TaskRequest,
     } from "$lib/api/tasks";
-    import TaskCard from "$lib/task_card.svelte";
+    import TaskCard from "$lib/components/task_card.svelte";
     import { BlockTitle, List, ListButton, ListInput } from "konsta/svelte";
-    import Navbar from "$lib/navbar.svelte";
+    import Navbar from "$lib/components/navbar.svelte";
 
     export let data;
 

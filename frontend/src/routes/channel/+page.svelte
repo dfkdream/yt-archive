@@ -1,8 +1,8 @@
 <script lang="ts">
-    import ChannelCard from "$lib/channel_card.svelte";
-    import Grid from "$lib/grid.svelte";
-    import Navbar from "$lib/navbar.svelte";
-    import VideoCard from "$lib/video_card.svelte";
+    import ChannelCard from "$lib/components/channel_card.svelte";
+    import Grid from "$lib/components/grid.svelte";
+    import Navbar from "$lib/components/navbar.svelte";
+    import VideoCard from "$lib/components/video_card.svelte";
 
     export let data;
 

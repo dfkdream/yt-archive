@@ -1,6 +1,6 @@
 <script lang="ts">
-    import Navbar from "$lib/navbar.svelte";
-    import ChannelCard from "$lib/channel_card.svelte";
+    import Navbar from "$lib/components/navbar.svelte";
+    import ChannelCard from "$lib/components/channel_card.svelte";
 
     export let data;
 

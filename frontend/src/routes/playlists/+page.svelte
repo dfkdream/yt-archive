@@ -1,7 +1,7 @@
 <script lang="ts">
     import { Block } from "konsta/svelte";
-    import Navbar from "$lib/navbar.svelte";
-    import Grid from "$lib/grid.svelte";
+    import Navbar from "$lib/components/navbar.svelte";
+    import Grid from "$lib/components/grid.svelte";
 
     export let data;
 

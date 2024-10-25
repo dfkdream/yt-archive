@@ -1,6 +1,6 @@
 <script lang="ts">
     import { Badge, Block } from "konsta/svelte";
-    import type { Task } from "./api/tasks";
+    import type { Task } from "../api/tasks";
 
     export let task: Task;
 

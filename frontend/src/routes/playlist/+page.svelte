@@ -4,7 +4,7 @@
         UpdateIndex,
         type IndexedVideo,
     } from "$lib/api/playlist.js";
-    import Navbar from "$lib/navbar.svelte";
+    import Navbar from "$lib/components/navbar.svelte";
     import {
         Block,
         List,
@@ -13,8 +13,8 @@
         Dialog,
         DialogButton,
     } from "konsta/svelte";
-    import VideoCard from "$lib/video_card.svelte";
-    import Grid from "$lib/grid.svelte";
+    import VideoCard from "$lib/components/video_card.svelte";
+    import Grid from "$lib/components/grid.svelte";
 
     export let data;
 

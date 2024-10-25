@@ -1,7 +1,7 @@
 <script lang="ts">
-    import Navbar from "$lib/navbar.svelte";
-    import Grid from "$lib/grid.svelte";
-    import VideoCard from "$lib/video_card.svelte";
+    import Navbar from "$lib/components/navbar.svelte";
+    import Grid from "$lib/components/grid.svelte";
+    import VideoCard from "$lib/components/video_card.svelte";
 
     export let data;
 

@@ -1,6 +1,6 @@
 <script lang="ts">
     import { Block } from "konsta/svelte";
-    import type { Video } from "./api/video";
+    import type { Video } from "../api/video";
 
     export let showPoster = false;
     export let showChannel = false;

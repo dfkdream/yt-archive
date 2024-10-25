@@ -1,10 +1,10 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
-    import DashAudio from "$lib/dash_audio.svelte";
-    import DashVideo from "$lib/dash_video.svelte";
-    import LinkableText from "$lib/linkable_text.svelte";
-    import Navbar from "$lib/navbar.svelte";
-    import VideoCard from "$lib/video_card.svelte";
+    import DashAudio from "$lib/components/dash_audio.svelte";
+    import DashVideo from "$lib/components/dash_video.svelte";
+    import LinkableText from "$lib/components/linkable_text.svelte";
+    import Navbar from "$lib/components/navbar.svelte";
+    import VideoCard from "$lib/components/video_card.svelte";
     import type dashjs from "dashjs";
     import { List, ListItem, Block, Toggle, BlockTitle } from "konsta/svelte";
 
