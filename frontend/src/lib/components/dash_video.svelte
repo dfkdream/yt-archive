@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type dashjs from "dashjs";
+    import { MediaPlayer } from "dashjs";
     import { onMount } from "svelte";
 
     let videoElement: HTMLVideoElement;
@@ -27,10 +27,14 @@
 
     let player: dashjs.MediaPlayerClass | null = null;
 
+    let playerInitialized = false;
+
     onMount(async () => {
-        const { MediaPlayer } = await import("dashjs");
         player = MediaPlayer().create();
+
         player.initialize(videoElement, manifest, autoplay);
+
+        playerInitialized = true;
 
         player.on("streamInitialized", () => {
             videoBitrateList = player?.getBitrateInfoListFor("video") || null;
@@ -38,8 +42,10 @@
         });
 
         player.on("metricsChanged", () => {
-            videoQuality = player?.getQualityFor("video") || 0;
-            bufferLength = player?.getBufferLength("video") || 0;
+            try {
+                videoQuality = player?.getQualityFor("video") || 0;
+                bufferLength = player?.getBufferLength("video") || 0;
+            } catch {}
         });
 
         player.on("playbackPlaying", () => {
@@ -55,7 +61,15 @@
         });
     });
 
+    function onManifestChange(manifest: string) {
+        if (!playerInitialized) return;
+        startTime = 0;
+        currentTime = 0;
+        player?.initialize(videoElement, manifest, autoplay);
+    }
+
     $: player?.seek(startTime);
+    $: onManifestChange(manifest);
 </script>
 
 <!-- svelte-ignore a11y-media-has-caption -->

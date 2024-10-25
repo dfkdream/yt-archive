@@ -23,17 +23,23 @@
 
     let player: dashjs.MediaPlayerClass | null = null;
 
+    let playerInitialized = false;
+
     onMount(async () => {
         const { MediaPlayer } = await import("dashjs");
         player = MediaPlayer().create();
         player.initialize(audioElement, manifest, autoplay);
+
+        playerInitialized = true;
 
         player.on("streamInitialized", () => {
             player?.seek(startTime);
         });
 
         player.on("metricsChanged", () => {
-            bufferLength = player?.getBufferLength("audio") || 0;
+            try {
+                bufferLength = player?.getBufferLength("audio") || 0;
+            } catch {}
         });
 
         player.on("playbackPlaying", () => {
@@ -49,7 +55,15 @@
         });
     });
 
+    function onManifestChange(manifest: string) {
+        if (!playerInitialized) return;
+        startTime = 0;
+        currentTime = 0;
+        player?.initialize(audioElement, manifest, autoplay);
+    }
+
     $: player?.seek(startTime);
+    $: onManifestChange(manifest);
 </script>
 
 <div class="relative" {...$$restProps}>

@@ -63,40 +63,38 @@
 
 <Navbar small />
 
-{#key video.ID}
-    {#if radioMode}
-        <DashAudio
-            {manifest}
-            {poster}
-            controls
-            {loop}
-            bind:bufferLength
-            class={mediaClass}
-            {startTime}
-            bind:currentTime
-            bind:isPlaying
-            autoplay={isPlaying}
-            onPlaybackEnded={nextVideo}
-        />
-    {:else}
-        <DashVideo
-            {manifest}
-            {poster}
-            controls
-            playsinline
-            {loop}
-            class={mediaClass}
-            bind:videoQuality
-            bind:videoBitrateList
-            bind:bufferLength
-            {startTime}
-            bind:currentTime
-            bind:isPlaying
-            autoplay={isPlaying}
-            onPlaybackEnded={nextVideo}
-        />
-    {/if}
-{/key}
+{#if radioMode}
+    <DashAudio
+        {manifest}
+        {poster}
+        controls
+        {loop}
+        bind:bufferLength
+        class={mediaClass}
+        {startTime}
+        bind:currentTime
+        bind:isPlaying
+        autoplay={isPlaying}
+        onPlaybackEnded={nextVideo}
+    />
+{:else}
+    <DashVideo
+        {manifest}
+        {poster}
+        controls
+        playsinline
+        {loop}
+        class={mediaClass}
+        bind:videoQuality
+        bind:videoBitrateList
+        bind:bufferLength
+        {startTime}
+        bind:currentTime
+        bind:isPlaying
+        autoplay={isPlaying}
+        onPlaybackEnded={nextVideo}
+    />
+{/if}
 
 <VideoCard {video} showChannel fullTitle />
 <Block strong inset>
