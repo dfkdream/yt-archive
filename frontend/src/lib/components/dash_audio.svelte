@@ -59,7 +59,10 @@
         if (!playerInitialized) return;
         startTime = 0;
         currentTime = 0;
-        player?.initialize(audioElement, manifest, autoplay);
+        player?.attachSource(manifest, startTime);
+        if (autoplay) {
+            player?.play();
+        }
     }
 
     $: player?.seek(startTime);
