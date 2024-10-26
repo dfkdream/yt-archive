@@ -1,6 +1,5 @@
 <script lang="ts">
-    import { goto } from "$app/navigation";
-    import { Navbar, Segmented, SegmentedButton } from "konsta/svelte";
+    import { Navbar, Segmented, Button } from "konsta/svelte";
 
     export let location: "home" | "channels" | "playlists" | "tasks" | null =
         null;
@@ -28,13 +27,13 @@
 <Navbar medium={!small} transparent={!small} {title}>
     <Segmented slot="subnavbar" strong>
         {#each locations as l}
-            <SegmentedButton
-                strong
-                active={l.isActive}
-                onClick={() => {
-                    goto(l.location);
-                }}>{l.name}</SegmentedButton
+            <Button
+                segmentedStrong
+                segmentedActive={l.isActive}
+                href={l.location}
             >
+                {l.name}
+            </Button>
         {/each}
     </Segmented>
 </Navbar>
