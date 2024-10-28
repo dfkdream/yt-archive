@@ -26,6 +26,10 @@ export async function load({ url, fetch }) {
         id,
         playlist,
         video,
-        startTime: parseInt(url.searchParams.get("t") || "0"),
+        startTime: parseInt(
+            url.searchParams.get("t") ||
+                localStorage.getItem(`${id}.lastTime`) ||
+                "0",
+        ),
     };
 }

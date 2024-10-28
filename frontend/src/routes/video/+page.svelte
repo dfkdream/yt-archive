@@ -89,6 +89,15 @@
 
     $: bitrateString = getBitrateString(videoBitrateList, videoQuality);
     $: startTime = data.startTime;
+
+    setInterval(() => {
+        if (!isPlaying) return;
+
+        localStorage.setItem(
+            `${data.id}.lastTime`,
+            currentTime.toFixed(0).toString(),
+        );
+    }, 1000);
 </script>
 
 <svelte:head>
