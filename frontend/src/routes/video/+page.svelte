@@ -1,5 +1,7 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
+    import type { PlaylistVideos } from "$lib/api/playlist.js";
+    import type { Video } from "$lib/api/video.js";
     import DashAudio from "$lib/components/dash_audio.svelte";
     import DashVideo from "$lib/components/dash_video.svelte";
     import LinkableText from "$lib/components/linkable_text.svelte";
@@ -26,14 +28,46 @@
     let loop = false;
     let radioMode = false;
     let autoplay = false;
+    let loopPlaylist = false;
 
     let isPlaying = false;
 
+    let videoBefore: Video | null = null;
+    let videoAfter: Video | null = null;
+
+    function getAdjacentVideos(
+        video: Video,
+        playlist: PlaylistVideos | null,
+        loopPlaylist: boolean,
+    ) {
+        if (!playlist) return;
+
+        const len = playlist.Videos.length;
+
+        videoBefore = null;
+        videoAfter = null;
+
+        playlist.Videos.forEach((v, i, a) => {
+            if (v.ID === video.ID) {
+                if (i != 0 || loopPlaylist) {
+                    videoBefore = a[(len + i - 1) % len];
+                }
+
+                if (i != len - 1 || loopPlaylist) {
+                    videoAfter = a[(i + 1) % len];
+                }
+            }
+        });
+    }
+
+    $: getAdjacentVideos(data.video, data.playlist, loopPlaylist);
+
     function nextVideo() {
         if (!autoplay) return;
-        if (!data.videoAfter) return;
+        if (!videoAfter) return;
+        if (!data.playlist) return;
         isPlaying = true;
-        goto(`?id=${data.videoAfter.ID}&list=${data.playlistID}`);
+        goto(`?id=${videoAfter.ID}&list=${data.playlist.ID}`);
     }
 
     let bitrateString = "N/A";
@@ -118,21 +152,24 @@
             }}
         ></Toggle>
     </ListItem>
-    {#if data.playlistID}
+    {#if data.playlist}
         <ListItem title="Autoplay">
             <Toggle slot="after" bind:checked={autoplay} />
+        </ListItem>
+        <ListItem title="Loop Playlist">
+            <Toggle slot="after" bind:checked={loopPlaylist} />
         </ListItem>
     {/if}
 </List>
 
-{#if data.videoBefore}
-    <BlockTitle>Previous</BlockTitle>
-    <VideoCard video={data.videoBefore} listID={data.playlistID} showChannel />
+{#if data.playlist && videoAfter}
+    <BlockTitle>Next</BlockTitle>
+    <VideoCard video={videoAfter} listID={data.playlist.ID} showChannel />
 {/if}
 
-{#if data.videoAfter}
-    <BlockTitle>Next</BlockTitle>
-    <VideoCard video={data.videoAfter} listID={data.playlistID} showChannel />
+{#if data.playlist && videoBefore}
+    <BlockTitle>Previous</BlockTitle>
+    <VideoCard video={videoBefore} listID={data.playlist.ID} showChannel />
 {/if}
 
 <List strong inset>
