@@ -25,10 +25,17 @@
     let startTime = data.startTime;
     let currentTime = startTime;
 
-    let loop = false;
-    let radioMode = false;
-    let autoplay = false;
-    let loopPlaylist = false;
+    const keyLoop = "loop";
+    let loop = localStorage.getItem(keyLoop) === "true";
+
+    const keyRadioMode = "radioMode";
+    let radioMode = localStorage.getItem(keyRadioMode) === "true";
+
+    const keyAutoplay = "autoplay";
+    let autoplay = localStorage.getItem(keyAutoplay) === "true";
+
+    const keyLoopPlaylist = "loopPlaylist";
+    let loopPlaylist = localStorage.getItem(keyLoopPlaylist) === "true";
 
     let isPlaying = false;
 
@@ -150,7 +157,13 @@
 
 <List strong inset>
     <ListItem title="Loop">
-        <Toggle slot="after" bind:checked={loop} />
+        <Toggle
+            slot="after"
+            bind:checked={loop}
+            onChange={() => {
+                localStorage.setItem(keyLoop, loop.toString());
+            }}
+        />
     </ListItem>
     <ListItem title="Radio Mode">
         <Toggle
@@ -158,15 +171,31 @@
             bind:checked={radioMode}
             onChange={() => {
                 startTime = currentTime;
+                localStorage.setItem(keyRadioMode, radioMode.toString());
             }}
         ></Toggle>
     </ListItem>
     {#if data.playlist}
         <ListItem title="Autoplay">
-            <Toggle slot="after" bind:checked={autoplay} />
+            <Toggle
+                slot="after"
+                bind:checked={autoplay}
+                onChange={() => {
+                    localStorage.setItem(keyAutoplay, autoplay.toString());
+                }}
+            />
         </ListItem>
         <ListItem title="Loop Playlist">
-            <Toggle slot="after" bind:checked={loopPlaylist} />
+            <Toggle
+                slot="after"
+                bind:checked={loopPlaylist}
+                onChange={() => {
+                    localStorage.setItem(
+                        keyLoopPlaylist,
+                        loopPlaylist.toString(),
+                    );
+                }}
+            />
         </ListItem>
     {/if}
 </List>
