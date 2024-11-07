@@ -18,7 +18,7 @@
             );
         }
 
-        input = input.replaceAll(/(@\w+)/g, '<a href="/channels?id=$1">$1</a>');
+        input = input.replaceAll(/(@\w+)/g, '<a href="/channel?id=$1">$1</a>');
 
         const matches = input.matchAll(/\b([0-9]{1,2}):([0-5][0-9])\b/g);
         for (const m of matches) {
