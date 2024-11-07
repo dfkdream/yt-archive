@@ -173,7 +173,7 @@
                 startTime = currentTime;
                 localStorage.setItem(keyRadioMode, radioMode.toString());
             }}
-        ></Toggle>
+        />
     </ListItem>
     {#if data.playlist}
         <ListItem title="Autoplay">
