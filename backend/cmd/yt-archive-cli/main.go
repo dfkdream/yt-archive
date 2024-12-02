@@ -34,6 +34,7 @@ func main() {
 		resetAllErroredTasks,
 		showFinishedTasks,
 		deleteFinishedTasks,
+		rebuildManifest,
 	}
 
 	fmt.Println("Welcome to yt-archive CLI!")
@@ -46,6 +47,7 @@ func main() {
 				huh.NewOption("Reset all errored tasks", 1),
 				huh.NewOption("Show finished tasks", 2),
 				huh.NewOption("Delete finished tasks", 3),
+				huh.NewOption("Rebuild video manifest", 4),
 				huh.NewOption("Exit", -1),
 			).
 			Value(&selection).
