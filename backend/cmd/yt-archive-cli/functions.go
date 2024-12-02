@@ -102,7 +102,7 @@ func deleteFinishedTasks() {
 		log.Fatal(err)
 	}
 
-	rowsAffected, err := execRowsAffected("delete from tasks where id not in (select id from tasks order by id desc limit ?)", preserveN)
+	rowsAffected, err := execRowsAffected("delete from tasks where status=3 and id not in (select id from tasks where status=3 order by id desc limit ?)", preserveN)
 	if err != nil {
 		log.Fatal(err)
 	}
