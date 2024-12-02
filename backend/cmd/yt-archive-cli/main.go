@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"yt-archive/taskq"
 
 	"github.com/charmbracelet/huh"
 	_ "github.com/mattn/go-sqlite3"
@@ -25,6 +26,13 @@ func init() {
 	}
 
 	db.SetMaxOpenConns(1)
+
+	q, err := taskq.New(db)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	taskq.SetDefaultQueue(q)
 }
 
 func main() {
@@ -35,6 +43,7 @@ func main() {
 		showFinishedTasks,
 		deleteFinishedTasks,
 		rebuildManifest,
+		scanMissingVideoFiles,
 	}
 
 	fmt.Println("Welcome to yt-archive CLI!")
@@ -48,6 +57,7 @@ func main() {
 				huh.NewOption("Show finished tasks", 2),
 				huh.NewOption("Delete finished tasks", 3),
 				huh.NewOption("Rebuild video manifest", 4),
+				huh.NewOption("Scan missing video files", 5),
 				huh.NewOption("Exit", -1),
 			).
 			Value(&selection).

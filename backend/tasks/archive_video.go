@@ -72,32 +72,13 @@ func (a ArchiveVideoHandler) Handler(task *taskq.Task) error {
 		return nil
 	}
 
-	tempDir, err := os.MkdirTemp("", videoID+"_*")
-	if err != nil {
-		return err
-	}
-	defer os.RemoveAll(tempDir)
-
-	videoURL := "https://www.youtube.com/watch?v=" + videoID
-	err = Exec("yt-dlp", "--write-info-json", "--skip-download", "--write-thumbnail", "-o", "%(id)s.%(ext)s", "--paths", tempDir, videoURL)
-	if err != nil {
-		return err
-	}
-
-	thumbnail, err := copyThumbnail(tempDir)
-	if err != nil {
-		return err
-	}
-
-	slog.Info("downloaded thumbnail", "filename", thumbnail)
-
 	destPath := filepath.Join("videos", videoID)
 	err = os.MkdirAll(destPath, os.FileMode(0o700))
 	if err != nil {
 		return err
 	}
 
-	metadata, err := parseVideoMetadata(filepath.Join(tempDir, videoID+".info.json"))
+	metadata, thumbnail, err := DownloadVideoMetadata(videoID, true)
 	if err != nil {
 		return err
 	}
@@ -116,7 +97,7 @@ func (a ArchiveVideoHandler) Handler(task *taskq.Task) error {
 
 	taskq.Enqueue(t)
 
-	formats := selectVideoFormats(metadata.Formats)
+	formats := SelectVideoFormats(metadata.Formats)
 
 	downloadMediaPayload := DownloadMediaPayload{
 		VideoID:      videoID,
@@ -135,14 +116,14 @@ func (a ArchiveVideoHandler) Handler(task *taskq.Task) error {
 	for _, v := range formats {
 		downloadMediaPayload.Format = v.FormatID
 		downloadMediaPayload.OutputPath = filepath.Join(destPath, videoID+"_"+strconv.Itoa(v.Height)+MEDIA_FILE_SUFFIX)
-		downloadMediaPayload.SkipEncoding = canSkipEncoding(v)
+		downloadMediaPayload.SkipEncoding = CanSkipEncoding(v)
 
 		description := fmt.Sprintf("%s, %d, %s", videoID, v.Height, v.VideoCodec)
 		if !downloadMediaPayload.SkipEncoding {
 			description += " (Encoding required)"
 		}
 
-		t, err = taskq.NewJsonTask(calculateVideoPriority(v), TaskTypeDownloadMedia, description, downloadMediaPayload)
+		t, err = taskq.NewJsonTask(CalculateVideoPriority(v), TaskTypeDownloadMedia, description, downloadMediaPayload)
 		if err != nil {
 			return err
 		}
@@ -153,7 +134,7 @@ func (a ArchiveVideoHandler) Handler(task *taskq.Task) error {
 	return nil
 }
 
-func selectVideoFormats(formats []format) []format {
+func SelectVideoFormats(formats []format) []format {
 	/*
 		Format preference:
 		webm (vp09, av01) - Other
@@ -215,7 +196,7 @@ func calculateFormatPreference(f format) int {
 	return preference
 }
 
-func canSkipEncoding(f format) bool {
+func CanSkipEncoding(f format) bool {
 	return encodingPreference(f) == 2
 }
 
@@ -242,16 +223,38 @@ func encodingPreference(f format) int {
 	return 0
 }
 
-func parseVideoMetadata(path string) (*videoMetadata, error) {
-	f, err := os.Open(path)
+func DownloadVideoMetadata(videoID string, writeThumbnail bool) (*videoMetadata, string, error) {
+	tempDir, err := os.MkdirTemp("", videoID+"_*")
 	if err != nil {
-		return nil, err
+		return nil, "", err
+	}
+	defer os.RemoveAll(tempDir)
+
+	videoURL := "https://www.youtube.com/watch?v=" + videoID
+	err = Exec("yt-dlp", "--write-info-json", "--skip-download", "--write-thumbnail", "-o", "%(id)s.%(ext)s", "--paths", tempDir, videoURL)
+	if err != nil {
+		return nil, "", err
+	}
+
+	var thumbnail string
+	if writeThumbnail {
+		thumbnail, err = copyThumbnail(tempDir)
+		if err != nil {
+			return nil, "", err
+		}
+
+		slog.Info("downloaded thumbnail", "filename", thumbnail)
+	}
+
+	f, err := os.Open(filepath.Join(tempDir, videoID+".info.json"))
+	if err != nil {
+		return nil, "", err
 	}
 	defer f.Close()
 
 	var metadata videoMetadata
 	err = json.NewDecoder(f).Decode(&metadata)
-	return &metadata, err
+	return &metadata, thumbnail, err
 }
 
 const thumbnailExtensions = ".webp|.jpg|.png"

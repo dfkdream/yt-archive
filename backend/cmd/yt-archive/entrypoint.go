@@ -59,6 +59,11 @@ func entrypoint(distFS fs.FS) {
 		log.Fatal(err)
 	}
 
+	err = q.ResetRunningTasks()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	taskq.SetDefaultQueue(q)
 
 	archiveVideo, err := tasks.NewArchiveVideoHandler(db)

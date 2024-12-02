@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"yt-archive/mpd"
+	"yt-archive/taskq"
 	"yt-archive/tasks"
 
 	"github.com/charmbracelet/huh"
@@ -131,8 +132,8 @@ func rebuildManifest() {
 	}
 
 	videoPath := filepath.Join("videos", videoID)
-	if _, err := os.Stat(videoPath); err != nil {
-		log.Println(err)
+	if !isDirExist(videoPath) {
+		log.Printf("Video %s not found\n", videoID)
 		return
 	}
 
@@ -195,4 +196,133 @@ func rebuildManifest() {
 	}
 
 	log.Println("Done! Manifest written to", finalManifest)
+}
+
+func scanMissingVideoFiles() {
+	videoID := ""
+
+	err := huh.NewInput().
+		Title("Scan missing video files").
+		Description("Enter video ID").
+		Value(&videoID).
+		Run()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	videoPath := filepath.Join("videos", videoID)
+	if !isDirExist(videoPath) {
+		log.Printf("Video %s not found\n", videoID)
+		return
+	}
+
+	metadata, _, err := tasks.DownloadVideoMetadata(videoID, false)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	tasksToEnqueue := make([]*taskq.Task, 0)
+
+	payload := tasks.DownloadMediaPayload{
+		VideoID:      videoID,
+		Format:       "bestaudio",
+		OutputPath:   filepath.Join(videoPath, videoID+tasks.AUDIO_FILE_SUFFIX),
+		SkipEncoding: false,
+	}
+
+	if !isFileExist(payload.OutputPath) {
+		// Enqueue audio download task
+		t, err := taskq.NewJsonTask(
+			tasks.PriorityDownloadAudio,
+			tasks.TaskTypeDownloadMedia,
+			videoID+", bestaudio (CLI)",
+			payload,
+		)
+
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		tasksToEnqueue = append(tasksToEnqueue, t)
+	}
+
+	formats := tasks.SelectVideoFormats(metadata.Formats)
+	for _, v := range formats {
+		videoFilePath := filepath.Join(videoPath, fmt.Sprintf("%s_%d"+tasks.MEDIA_FILE_SUFFIX, videoID, v.Height))
+		if !isFileExist(videoFilePath) {
+			// Enqueue video download task
+			payload.Format = v.FormatID
+			payload.OutputPath = videoFilePath
+			payload.SkipEncoding = tasks.CanSkipEncoding(v)
+
+			description := fmt.Sprintf("%s, %d, %s", videoID, v.Height, v.VideoCodec)
+			if !payload.SkipEncoding {
+				description += " (Encoding required)"
+			}
+			description += " (CLI)"
+
+			t, err := taskq.NewJsonTask(
+				tasks.CalculateVideoPriority(v),
+				tasks.TaskTypeDownloadMedia,
+				description,
+				payload,
+			)
+
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			tasksToEnqueue = append(tasksToEnqueue, t)
+		}
+	}
+
+	if len(tasksToEnqueue) == 0 {
+		fmt.Println("Everything is OK")
+		return
+	}
+
+	fmt.Println("Tasks to be enqueued:")
+	for _, t := range tasksToEnqueue {
+		fmt.Println(t.ID, t.Description)
+	}
+
+	enqueueNow := true
+	huh.NewConfirm().
+		Title("Would you like to enqueue these tasks?").
+		Value(&enqueueNow).
+		Run()
+
+	if !enqueueNow {
+		return
+	}
+
+	for _, t := range tasksToEnqueue {
+		err = taskq.Enqueue(t)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+	}
+}
+
+func isDirExist(path string) bool {
+	stat, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+
+	return stat.IsDir()
+}
+
+func isFileExist(path string) bool {
+	stat, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+
+	return !stat.IsDir()
 }

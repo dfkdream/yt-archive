@@ -14,10 +14,10 @@ const (
 	PriorityHighest
 )
 
-func calculateVideoPriority(f format) int {
+func CalculateVideoPriority(f format) int {
 	priority := PriorityDownloadVideo
 
-	if canSkipEncoding(f) {
+	if CanSkipEncoding(f) {
 		priority += priorityGap / 2
 	}
 
