@@ -1,6 +1,7 @@
 # Build files
 /dist
 /yt-archive
+/yt-archive-cli
 
 # Runtime-generated files
 /thumbnails

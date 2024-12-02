@@ -22,7 +22,7 @@ COPY ./Makefile .
 
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
-    make yt-archive
+    make yt-archive yt-archive-cli
 
 FROM alpine
 
@@ -35,5 +35,7 @@ WORKDIR /yt-archive
 COPY --from=frontend /yt-archive/dist ./dist
 
 COPY --from=backend /yt-archive/yt-archive ./yt-archive
+
+COPY --from=backend /yt-archive/yt-archive-cli ./yt-archive-cli
 
 ENTRYPOINT ["./yt-archive"]

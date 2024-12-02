@@ -1,11 +1,12 @@
 COMMON_BACKEND_FILES := $(wildcard backend/go.* backend/**/*.go)
 
 BACKEND_FILES := $(wildcard backend/cmd/yt-archive/*.go) $(COMMON_BACKEND_FILES)
+CLI_FILES := $(wildcard backend/cmd/yt-archive-cli/*.go) $(COMMON_BACKEND_FILES)
 
 FRONTEND_FILES := $(wildcard frontend/src/* frontend/src/**/* frontend/static/**/* frontend/*.js*)
 
 .PHONY: all
-all: dist yt-archive
+all: dist yt-archive yt-archive-cli
 
 dist: $(FRONTEND_FILES)
 	cd frontend &&\
@@ -23,6 +24,10 @@ standalone: dist $(BACKEND_FILES)
 	go build -tags standalone -o .. ./cmd/yt-archive &&\
 	rm -r cmd/yt-archive/dist
 
+yt-archive-cli: $(CLI_FILES)
+	cd backend &&\
+	go build -o .. ./cmd/yt-archive-cli
+
 .PHONY: start
 start: all
 	./yt-archive
@@ -35,5 +40,5 @@ dev: yt-archive
 
 .PHONY: clean
 clean:
-	rm yt-archive
+	rm yt-archive yt-archive-cli
 	rm -r dist
