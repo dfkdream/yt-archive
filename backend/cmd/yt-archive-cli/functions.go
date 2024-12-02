@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"yt-archive/mpd"
@@ -118,12 +119,23 @@ func deleteFinishedTasks() {
 	fmt.Printf("%d tasks deleted.\n", rowsAffected)
 }
 
+var videoIDRegex = regexp.MustCompile("^[A-Za-z0-9_-]{11}$")
+
+func videoIDValidator(s string) error {
+	if !videoIDRegex.MatchString(s) {
+		return fmt.Errorf("invalid video ID")
+	}
+
+	return nil
+}
+
 func rebuildManifest() {
 	videoID := ""
 
 	err := huh.NewInput().
 		Title("Rebuild manifest").
 		Description("Enter video ID").
+		Validate(videoIDValidator).
 		Value(&videoID).
 		Run()
 
@@ -204,6 +216,7 @@ func scanMissingVideoFiles() {
 	err := huh.NewInput().
 		Title("Scan missing video files").
 		Description("Enter video ID").
+		Validate(videoIDValidator).
 		Value(&videoID).
 		Run()
 
