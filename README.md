@@ -1,14 +1,14 @@
 # yt-archive
 A mobile-friendly, self-hosted video archiver
 
-<div style="margin: 1em; text-align: center;">
-<div style="display: flex; align-items: center; justify-content: space-around;">
-    <img src="docs/home.png" style="width: 30%;" />
-    <img src="docs/video.png" style="width: 30%;" />
-</div>
+<div>
+    <div>
+        <img src="docs/home.png" width="30%" />
+        <img src="docs/video.png" width="30%" />
+    </div>
 Image copyright: (c) copyright 2008, Blender Foundation / www.bigbuckbunny.org
 
-Blender Logo copyright:  ™/®Blender Foundation
+Blender Logo copyright: ™/®Blender Foundation
 </div>
 
 # Why Another Video Archiver?
