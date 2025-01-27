@@ -59,7 +59,8 @@ func (c channelVideosHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 
 	query := `
 	select c.id, c.title, c.description, c.thumbnail,
-		v.id, v.title, v.description, timestamp, duration, owner, v.thumbnail
+		ifnull(v.id, ""), ifnull(v.title, ""), ifnull(v.description, ""),
+		timestamp, ifnull(duration, ""), ifnull(owner, ""), ifnull(v.thumbnail, "")
 	from channels as c
 	left join videos as v
 	on v.owner = c.id
@@ -79,9 +80,12 @@ func (c channelVideosHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	var channelVideos ChannelVideos
 	for rows.Next() {
 		var video Video
+
+		videoTimestamp := sql.NullTime{}
+
 		err = rows.Scan(
 			&channelVideos.ID, &channelVideos.Title, &channelVideos.Description, &channelVideos.Thumbnail,
-			&video.ID, &video.Title, &video.Description, &video.Timestamp, &video.Duration, &video.Owner, &video.Thumbnail,
+			&video.ID, &video.Title, &video.Description, &videoTimestamp, &video.Duration, &video.Owner, &video.Thumbnail,
 		)
 
 		if err != nil {
@@ -90,9 +94,14 @@ func (c channelVideosHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 
-		video.OwnerThumbnail = channelVideos.ID
-
-		channelVideos.Videos = append(channelVideos.Videos, video)
+		if video.ID != "" && videoTimestamp.Valid {
+			video.Timestamp = videoTimestamp.Time
+			video.OwnerThumbnail = channelVideos.ID
+			channelVideos.Videos = append(channelVideos.Videos, video)
+		} else {
+			// No video in this channel
+			channelVideos.Videos = []Video{}
+		}
 	}
 
 	if channelVideos.Videos == nil {
