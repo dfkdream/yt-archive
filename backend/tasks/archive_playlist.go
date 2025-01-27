@@ -90,6 +90,17 @@ func (a ArchivePlaylistHandler) Handler(task *taskq.Task) error {
 		return err
 	}
 
+	description := fmt.Sprintf("%s, from playlist %s", metadata.Owner, playlistID)
+	t, err := taskq.NewJsonTask(PriorityArchiveChannelInfo, TaskTypeArchiveChannelInfo, description, metadata.Owner)
+	if err != nil {
+		return err
+	}
+
+	err = taskq.Enqueue(t)
+	if err != nil {
+		return err
+	}
+
 	timestamp, err := time.ParseInLocation("20060102", metadata.Timestamp, time.Local)
 	if err != nil {
 		return err
