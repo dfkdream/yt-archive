@@ -93,7 +93,7 @@ func (p playlistVideosHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 
 	query := `
 	select p.id, p.title, p.description, p.timestamp, p.owner, c.thumbnail,
-		v.id, v.title, v.description, v.timestamp, v.duration, v.owner, v.thumbnail, pv.sortIndex
+		v.id, v.title, v.description, v.timestamp, v.duration, v.owner, vc.thumbnail, v.thumbnail, pv.sortIndex
 	from playlists as p
 	left join channels as c
 	on p.owner=c.id
@@ -101,6 +101,8 @@ func (p playlistVideosHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 	on p.id=pv.playlistId
 	left join videos as v
 	on pv.videoId=v.id	
+	left join channels as vc
+	on v.owner=vc.id
 	where p.id=?
 	order by pv.sortIndex asc, v.timestamp asc
 	`
@@ -121,7 +123,7 @@ func (p playlistVideosHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 			&playlistVideos.ID, &playlistVideos.Title, &playlistVideos.Description,
 			&playlistVideos.Timestamp, &playlistVideos.Owner, &playlistVideos.OwnerThumbnail,
 			&video.ID, &video.Title, &video.Description, &video.Timestamp, &video.Duration,
-			&video.Owner, &video.Thumbnail, &video.Index,
+			&video.Owner, &video.OwnerThumbnail, &video.Thumbnail, &video.Index,
 		)
 
 		if err != nil {
@@ -129,8 +131,6 @@ func (p playlistVideosHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 			writeError(w, http.StatusInternalServerError)
 			return
 		}
-
-		video.OwnerThumbnail = playlistVideos.OwnerThumbnail
 
 		if playlistVideos.Thumbnail == "" {
 			playlistVideos.ThumbnailVideo = video.ID
