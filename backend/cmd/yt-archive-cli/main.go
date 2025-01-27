@@ -39,7 +39,8 @@ func main() {
 	var selection int
 	var functions []func() = []func(){
 		showErroredTasks,
-		resetAllErroredTasks,
+		enqueueAllErroredTasks,
+		cancelAllErroredTasks,
 		showFinishedTasks,
 		deleteFinishedTasks,
 		rebuildManifest,
@@ -53,11 +54,12 @@ func main() {
 			Title("Main").
 			Options(
 				huh.NewOption("Show errored tasks", 0),
-				huh.NewOption("Reset all errored tasks", 1),
-				huh.NewOption("Show finished tasks", 2),
-				huh.NewOption("Delete finished tasks", 3),
-				huh.NewOption("Rebuild video manifest", 4),
-				huh.NewOption("Scan missing video files", 5),
+				huh.NewOption("Enqueue all errored tasks", 1),
+				huh.NewOption("Cancel all errored tasks", 2),
+				huh.NewOption("Show finished tasks", 3),
+				huh.NewOption("Delete finished tasks", 4),
+				huh.NewOption("Rebuild video manifest", 5),
+				huh.NewOption("Scan missing video files", 6),
 				huh.NewOption("Exit", -1),
 			).
 			Value(&selection).

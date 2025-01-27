@@ -39,8 +39,17 @@ func showErroredTasks() {
 	}
 }
 
-func resetAllErroredTasks() {
+func enqueueAllErroredTasks() {
 	rowsAffected, err := execRowsAffected("update tasks set status=0 where status=4")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("%d tasks updated.\n", rowsAffected)
+}
+
+func cancelAllErroredTasks() {
+	rowsAffected, err := execRowsAffected("update tasks set status=2 where status=4")
 	if err != nil {
 		log.Fatal(err)
 	}
