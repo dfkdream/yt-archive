@@ -10,9 +10,7 @@ RUN make dist
 
 FROM golang:alpine AS backend
 
-RUN apk update
-
-RUN apk add build-base
+RUN apk update && apk add build-base
 
 WORKDIR /yt-archive
 
@@ -26,9 +24,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
 
 FROM alpine
 
-RUN apk update
-
-RUN apk add yt-dlp ffmpeg
+RUN apk update && apk add yt-dlp ffmpeg
 
 WORKDIR /yt-archive
 
