@@ -140,6 +140,11 @@ func (p playlistVideosHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 		playlistVideos.Videos = append(playlistVideos.Videos, video)
 	}
 
+	if playlistVideos.Videos == nil {
+		writeError(w, http.StatusNotFound)
+		return
+	}
+
 	writeJson(w, playlistVideos)
 }
 
