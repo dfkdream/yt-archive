@@ -1,4 +1,5 @@
 import { mapTimestamp, type Video } from "./video";
+import { error } from "@sveltejs/kit";
 
 export interface Channel {
     ID: string;
@@ -19,6 +20,10 @@ export interface ChannelVideos extends Channel {
 
 export async function ChannelVideos(id: string, f = fetch) {
     let resp = await f(`/api/channels/${id}`);
+    if (resp.status != 200) {
+        error(resp.status, resp.statusText);
+    }
+
     let json: ChannelVideos = await resp.json();
     json.Videos = mapTimestamp(json.Videos);
     return json;

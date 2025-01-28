@@ -1,4 +1,5 @@
 import { mapTimestamp, type Video } from "./video";
+import { error } from "@sveltejs/kit";
 
 export interface Playlist {
     ID: string;
@@ -30,6 +31,10 @@ export interface PlaylistVideos extends Playlist {
 
 export async function PlaylistVideos(id: string, f = fetch) {
     let resp = await f(`/api/playlists/${id}`);
+    if (resp.status != 200) {
+        error(resp.status, resp.statusText);
+    }
+
     let json: PlaylistVideos = await resp.json();
     json.Timestamp = new Date(json.Timestamp);
     json.Videos = mapTimestamp(json.Videos);
