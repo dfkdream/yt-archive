@@ -18,6 +18,8 @@
 
             #frontend
             nodejs
+
+            imagemagick
           ];
         };
 
