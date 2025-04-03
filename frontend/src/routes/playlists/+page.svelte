@@ -32,6 +32,7 @@
 
                 <a href={`/channel?id=${p.Owner}`} class="flex items-center">
                     <img
+                        loading="lazy"
                         src={`/api/thumbnails/${p.OwnerThumbnail}`}
                         alt={p.Owner}
                         width="45px"

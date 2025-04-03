@@ -7,6 +7,7 @@
 
 <Block strong inset class="flex items-center !my-4">
     <img
+        loading="lazy"
         src={`/api/thumbnails/${channel.Thumbnail}`}
         alt={channel.Title}
         width="45px"

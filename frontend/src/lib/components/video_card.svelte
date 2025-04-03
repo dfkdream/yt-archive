@@ -19,6 +19,7 @@
             <div class="relative">
                 <img
                     class="mb-2"
+                    loading="lazy"
                     src={`/api/thumbnails/${video.Thumbnail}`}
                     alt={video.Title}
                 />
@@ -42,6 +43,7 @@
     {#if showChannel}
         <a href={`/channel?id=${video.Owner}`} class="flex items-center">
             <img
+                loading="lazy"
                 src={`/api/thumbnails/${video.OwnerThumbnail}`}
                 alt={video.Owner}
                 width="45px"
