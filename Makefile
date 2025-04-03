@@ -5,7 +5,6 @@ CLI_FILES := $(wildcard backend/cmd/yt-archive-cli/*.go) $(COMMON_BACKEND_FILES)
 
 FRONTEND_FILES := $(wildcard frontend/src/* frontend/src/**/* frontend/static/**/* frontend/*.js*)
 
-.PHONY: all
 all: dist yt-archive yt-archive-cli
 
 dist: $(FRONTEND_FILES)
@@ -17,7 +16,6 @@ yt-archive: $(BACKEND_FILES)
 	cd backend &&\
 	go build -o .. ./cmd/yt-archive
 
-.PHONY: standalone
 standalone: dist $(BACKEND_FILES)
 	cp -r dist backend/cmd/yt-archive &&\
 	cd backend &&\
@@ -28,17 +26,19 @@ yt-archive-cli: $(CLI_FILES)
 	cd backend &&\
 	go build -o .. ./cmd/yt-archive-cli
 
-.PHONY: start
 start: all
 	./yt-archive
 
-.PHONY: dev
 dev: yt-archive
 	YT_ARCHIVE_ADDR=localhost:8080 ./yt-archive & \
 	trap 'kill $$(pgrep yt-archive) && exit 0' SIGINT SIGTERM && \
 	(cd frontend && npm run dev) 
 
-.PHONY: clean
 clean:
 	rm yt-archive yt-archive-cli
 	rm -r dist
+
+reset:
+	rm -r thumbnails videos database
+
+.PHONY: all standalone start dev clean reset
