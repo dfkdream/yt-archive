@@ -15,6 +15,7 @@
             yt-dlp
             ffmpeg
             sqlitebrowser
+            sqlc
 
             #frontend
             nodejs

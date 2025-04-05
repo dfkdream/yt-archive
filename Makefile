@@ -5,12 +5,18 @@ CLI_FILES := $(wildcard backend/cmd/yt-archive-cli/*.go) $(COMMON_BACKEND_FILES)
 
 FRONTEND_FILES := $(wildcard frontend/src/* frontend/src/**/* frontend/static/**/* frontend/*.js*)
 
+SQL_FILES := $(wildcard backend/db/sql/*)
+
 all: dist yt-archive yt-archive-cli
 
 dist: $(FRONTEND_FILES)
 	cd frontend &&\
 	npm install &&\
 	npm run build
+
+sql: $(SQL_FILES)
+	cd backend &&\
+	sqlc generate
 
 yt-archive: $(BACKEND_FILES)
 	cd backend &&\
