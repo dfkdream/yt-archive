@@ -1,7 +1,7 @@
 package tasks
 
 import (
-	"database/sql"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,23 +12,11 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"yt-archive/db"
 	"yt-archive/taskq"
 )
 
 const TaskTypeArchiveVideo = "ARCHIVE_VIDEO"
-
-type ArchiveVideoHandler struct {
-	DB *sql.DB
-}
-
-func NewArchiveVideoHandler(db *sql.DB) (ArchiveVideoHandler, error) {
-	_, err := db.Exec("create table if not exists videos (id text primary key, title text, description text, timestamp timestamp, duration text, owner text, thumbnail text)")
-	if err != nil {
-		return ArchiveVideoHandler{}, err
-	}
-
-	return ArchiveVideoHandler{DB: db}, nil
-}
 
 type format struct {
 	FormatID   string  `json:"format_id"`
@@ -53,16 +41,14 @@ type videoMetadata struct {
 	Formats     []format `json:"formats"`
 }
 
-func (a ArchiveVideoHandler) Handler(task *taskq.Task) error {
+func ArchiveVideoHandler(task *taskq.Task) error {
 	var videoID string
 	err := json.Unmarshal(task.Payload, &videoID)
 	if err != nil {
 		return err
 	}
 
-	r := a.DB.QueryRow("select count(id) from videos where id=?", videoID)
-	var n int
-	err = r.Scan(&n)
+	n, err := db.Q().GetVideoCount(context.Background(), videoID)
 	if err != nil {
 		return err
 	}
@@ -83,8 +69,16 @@ func (a ArchiveVideoHandler) Handler(task *taskq.Task) error {
 		return err
 	}
 
-	_, err = a.DB.Exec("insert into videos (id, title, description, timestamp, duration, owner, thumbnail) values (?, ?, ?, ?, ?, ?, ?)",
-		metadata.ID, metadata.Title, metadata.Description, time.Unix(int64(metadata.Timestamp), 0), metadata.Duration, metadata.Owner, thumbnail)
+	err = db.Q().CreateVideo(context.Background(), db.CreateVideoParams{
+		ID:          metadata.ID,
+		Title:       metadata.Title,
+		Description: metadata.Description,
+		Timestamp:   time.Unix(int64(metadata.Timestamp), 0),
+		Duration:    metadata.Duration,
+		Owner:       metadata.Owner,
+		Thumbnail:   thumbnail,
+	})
+
 	if err != nil {
 		return err
 	}

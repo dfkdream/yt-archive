@@ -1,7 +1,7 @@
 package tasks
 
 import (
-	"database/sql"
+	"context"
 	"encoding/json"
 	"fmt"
 	"log/slog"
@@ -9,28 +9,11 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+	"yt-archive/db"
 	"yt-archive/taskq"
 )
 
 const TaskTypeArchivePlaylist = "ARCHIVE_PLAYLIST"
-
-type ArchivePlaylistHandler struct {
-	DB *sql.DB
-}
-
-func NewArchivePlaylistHandler(db *sql.DB) (ArchivePlaylistHandler, error) {
-	_, err := db.Exec("create table if not exists playlists (id text primary key unique, title text, description text, timestamp timestamp, owner text)")
-	if err != nil {
-		return ArchivePlaylistHandler{}, err
-	}
-
-	_, err = db.Exec("create table if not exists playlist_video (playlistId text, videoId text, sortIndex integer, unique (playlistId, videoId), primary key (playlistId, videoId))")
-	if err != nil {
-		return ArchivePlaylistHandler{}, err
-	}
-
-	return ArchivePlaylistHandler{DB: db}, nil
-}
 
 type playlistMetadata struct {
 	ID          string `json:"id"`
@@ -40,7 +23,7 @@ type playlistMetadata struct {
 	Timestamp   string `json:"modified_date"`
 }
 
-func (a ArchivePlaylistHandler) Handler(task *taskq.Task) error {
+func ArchivePlaylistHandler(task *taskq.Task) error {
 	var playlistID string
 	err := json.Unmarshal(task.Payload, &playlistID)
 	if err != nil {
@@ -119,27 +102,34 @@ func (a ArchivePlaylistHandler) Handler(task *taskq.Task) error {
 		}
 	}
 
-	tx, err := a.DB.Begin()
+	tx, err := db.DB().Begin()
 	if err != nil {
 		return err
 	}
 
-	query := `
-	insert into playlists (id, title, description, timestamp, owner) values (?, ?, ?, ?, ?)
-	on conflict(id) do update set timestamp=excluded.timestamp
-	`
+	defer tx.Rollback()
 
-	_, err = tx.Exec(query, metadata.ID, metadata.Title, metadata.Description, timestamp, metadata.Owner)
+	err = db.Q().WithTx(tx).CreatePlaylist(
+		context.Background(),
+		db.CreatePlaylistParams{
+			ID:          metadata.ID,
+			Title:       metadata.Title,
+			Description: metadata.Description,
+			Timestamp:   timestamp,
+			Owner:       metadata.Owner,
+		})
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	for _, videoID := range videos {
-		_, err = tx.Exec("insert into playlist_video (playlistId, videoId, sortIndex) values (?, ?, 0) on conflict(playlistId, videoId) do nothing",
-			playlistID, videoID)
+		err = db.Q().WithTx(tx).CreatePlaylistVideo(
+			context.Background(),
+			db.CreatePlaylistVideoParams{
+				Playlistid: playlistID,
+				Videoid:    videoID,
+			})
 		if err != nil {
-			tx.Rollback()
 			return err
 		}
 	}

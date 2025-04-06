@@ -8,7 +8,106 @@ package db
 import (
 	"context"
 	"database/sql"
+	"time"
 )
+
+const createChannel = `-- name: CreateChannel :exec
+insert into channels 
+(id, title, description, thumbnail) 
+values 
+(?, ?, ?, ?)
+`
+
+type CreateChannelParams struct {
+	ID          string
+	Title       string
+	Description string
+	Thumbnail   string
+}
+
+func (q *Queries) CreateChannel(ctx context.Context, arg CreateChannelParams) error {
+	_, err := q.db.ExecContext(ctx, createChannel,
+		arg.ID,
+		arg.Title,
+		arg.Description,
+		arg.Thumbnail,
+	)
+	return err
+}
+
+const createPlaylist = `-- name: CreatePlaylist :exec
+insert into playlists 
+(id, title, description, timestamp, owner) 
+values 
+(?, ?, ?, ?, ?)
+on conflict(id) do update set timestamp=excluded.timestamp
+`
+
+type CreatePlaylistParams struct {
+	ID          string
+	Title       string
+	Description string
+	Timestamp   time.Time
+	Owner       string
+}
+
+func (q *Queries) CreatePlaylist(ctx context.Context, arg CreatePlaylistParams) error {
+	_, err := q.db.ExecContext(ctx, createPlaylist,
+		arg.ID,
+		arg.Title,
+		arg.Description,
+		arg.Timestamp,
+		arg.Owner,
+	)
+	return err
+}
+
+const createPlaylistVideo = `-- name: CreatePlaylistVideo :exec
+insert into playlist_video 
+(playlistId, videoId, sortIndex) 
+values (?, ?, 0) 
+on conflict(playlistId, videoId) do nothing
+`
+
+type CreatePlaylistVideoParams struct {
+	Playlistid string
+	Videoid    string
+}
+
+func (q *Queries) CreatePlaylistVideo(ctx context.Context, arg CreatePlaylistVideoParams) error {
+	_, err := q.db.ExecContext(ctx, createPlaylistVideo, arg.Playlistid, arg.Videoid)
+	return err
+}
+
+const createVideo = `-- name: CreateVideo :exec
+insert into videos 
+(id, title, description, timestamp, duration, owner, thumbnail) 
+values 
+(?, ?, ?, ?, ?, ?, ?)
+`
+
+type CreateVideoParams struct {
+	ID          string
+	Title       string
+	Description string
+	Timestamp   time.Time
+	Duration    string
+	Owner       string
+	Thumbnail   string
+}
+
+func (q *Queries) CreateVideo(ctx context.Context, arg CreateVideoParams) error {
+	_, err := q.db.ExecContext(ctx, createVideo,
+		arg.ID,
+		arg.Title,
+		arg.Description,
+		arg.Timestamp,
+		arg.Duration,
+		arg.Owner,
+		arg.Thumbnail,
+	)
+	return err
+}
 
 const getChannel = `-- name: GetChannel :one
 select id, title, description, thumbnail from channels
@@ -25,6 +124,17 @@ func (q *Queries) GetChannel(ctx context.Context, id string) (Channel, error) {
 		&i.Thumbnail,
 	)
 	return i, err
+}
+
+const getChannelCount = `-- name: GetChannelCount :one
+select count(id) from channels where id=?
+`
+
+func (q *Queries) GetChannelCount(ctx context.Context, id string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getChannelCount, id)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
 }
 
 const getChannelVideos = `-- name: GetChannelVideos :many
@@ -272,6 +382,17 @@ func (q *Queries) GetVideo(ctx context.Context, id string) (GetVideoRow, error) 
 		&i.Channel.Thumbnail,
 	)
 	return i, err
+}
+
+const getVideoCount = `-- name: GetVideoCount :one
+select count(id) from videos where id=?
+`
+
+func (q *Queries) GetVideoCount(ctx context.Context, id string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getVideoCount, id)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
 }
 
 const getVideos = `-- name: GetVideos :many

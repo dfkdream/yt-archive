@@ -65,4 +65,35 @@ order by pv.sortIndex asc, v.timestamp asc;
 -- name: UpdatePlaylistVideoIndex :execrows
 update playlist_video 
 set sortIndex=? 
-where playlistId=? and videoId=?
+where playlistId=? and videoId=?;
+
+-- name: GetVideoCount :one
+select count(id) from videos where id=?;
+
+-- name: CreateVideo :exec
+insert into videos 
+(id, title, description, timestamp, duration, owner, thumbnail) 
+values 
+(?, ?, ?, ?, ?, ?, ?);
+
+-- name: CreatePlaylist :exec
+insert into playlists 
+(id, title, description, timestamp, owner) 
+values 
+(?, ?, ?, ?, ?)
+on conflict(id) do update set timestamp=excluded.timestamp;
+
+-- name: CreatePlaylistVideo :exec
+insert into playlist_video 
+(playlistId, videoId, sortIndex) 
+values (?, ?, 0) 
+on conflict(playlistId, videoId) do nothing;
+
+-- name: GetChannelCount :one
+select count(id) from channels where id=?;
+
+-- name: CreateChannel :exec
+insert into channels 
+(id, title, description, thumbnail) 
+values 
+(?, ?, ?, ?);

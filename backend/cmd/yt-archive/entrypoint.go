@@ -45,25 +45,10 @@ func entrypoint(distFS fs.FS) {
 
 	taskq.SetDefaultQueue(q)
 
-	archiveVideo, err := tasks.NewArchiveVideoHandler(db.DB())
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	archivePlaylist, err := tasks.NewArchivePlaylistHandler(db.DB())
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	archiveChannelInfo, err := tasks.NewArchiveChannelInfoHandler(db.DB())
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	taskq.Handler(tasks.TaskTypeArchiveVideo, archiveVideo.Handler)
+	taskq.Handler(tasks.TaskTypeArchiveVideo, tasks.ArchiveVideoHandler)
 	taskq.Handler(tasks.TaskTypeDownloadMedia, tasks.DownloadMediaHandler)
-	taskq.Handler(tasks.TaskTypeArchivePlaylist, archivePlaylist.Handler)
-	taskq.Handler(tasks.TaskTypeArchiveChannelInfo, archiveChannelInfo.Handler)
+	taskq.Handler(tasks.TaskTypeArchivePlaylist, tasks.ArchivePlaylistHandler)
+	taskq.Handler(tasks.TaskTypeArchiveChannelInfo, tasks.ArchiveChannelInfoHandler)
 
 	go taskq.Start()
 

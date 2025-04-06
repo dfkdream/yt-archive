@@ -1,29 +1,17 @@
 package tasks
 
 import (
-	"database/sql"
+	"context"
 	"encoding/json"
 	"log/slog"
 	"net/url"
 	"os"
 	"path/filepath"
+	"yt-archive/db"
 	"yt-archive/taskq"
 )
 
 const TaskTypeArchiveChannelInfo = "ARCHIVE_CHANNEL_INFO"
-
-type ArchiveChannelInfoHandler struct {
-	DB *sql.DB
-}
-
-func NewArchiveChannelInfoHandler(db *sql.DB) (ArchiveChannelInfoHandler, error) {
-	_, err := db.Exec("create table if not exists channels (id text primary key, title text, description text, thumbnail text)")
-	if err != nil {
-		return ArchiveChannelInfoHandler{}, err
-	}
-
-	return ArchiveChannelInfoHandler{DB: db}, nil
-}
 
 type channelMetadata struct {
 	ID          string `json:"id"`
@@ -31,16 +19,14 @@ type channelMetadata struct {
 	Description string `json:"description"`
 }
 
-func (a ArchiveChannelInfoHandler) Handler(task *taskq.Task) error {
+func ArchiveChannelInfoHandler(task *taskq.Task) error {
 	var channelID string
 	err := json.Unmarshal(task.Payload, &channelID)
 	if err != nil {
 		return err
 	}
 
-	r := a.DB.QueryRow("select count(id) from channels where id=?", channelID)
-	var n int
-	err = r.Scan(&n)
+	n, err := db.Q().GetChannelCount(context.Background(), channelID)
 	if err != nil {
 		return err
 	}
@@ -85,8 +71,14 @@ func (a ArchiveChannelInfoHandler) Handler(task *taskq.Task) error {
 		return err
 	}
 
-	_, err = a.DB.Exec("insert into channels (id, title, description, thumbnail) values (?, ?, ?, ?)",
-		metadata.ID, metadata.Title, metadata.Description, thumbnail)
+	err = db.Q().CreateChannel(
+		context.Background(),
+		db.CreateChannelParams{
+			ID:          metadata.ID,
+			Title:       metadata.Title,
+			Description: metadata.Description,
+			Thumbnail:   thumbnail,
+		})
 
 	if err != nil {
 		return err
