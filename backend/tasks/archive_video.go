@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -284,12 +285,17 @@ func copyThumbnail(path string) (string, error) {
 		return "", err
 	}
 
-	err = copyFile(filepath.Join(path, filename), filepath.Join(dest, filename))
+	unescapedFilename, err := url.PathUnescape(filename)
 	if err != nil {
 		return "", err
 	}
 
-	return filename, err
+	err = copyFile(filepath.Join(path, filename), filepath.Join(dest, unescapedFilename))
+	if err != nil {
+		return "", err
+	}
+
+	return unescapedFilename, err
 }
 
 func copyFile(src, dst string) error {

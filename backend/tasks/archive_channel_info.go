@@ -6,7 +6,9 @@ import (
 	"log/slog"
 	"net/url"
 	"os"
+	"path"
 	"path/filepath"
+	"strings"
 	"yt-archive/taskq"
 )
 
@@ -26,7 +28,7 @@ func NewArchiveChannelInfoHandler(db *sql.DB) (ArchiveChannelInfoHandler, error)
 }
 
 type channelMetadata struct {
-	ID          string `json:"id"`
+	ID          string `json:"uploader_id"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
 }
@@ -73,7 +75,9 @@ func (a ArchiveChannelInfoHandler) Handler(task *taskq.Task) error {
 
 	slog.Info("downloaded thumbnail", "filename", thumbnail)
 
-	f, err := os.Open(filepath.Join(tempDir, channelID+".info.json"))
+	metadataFileName := url.PathEscape(strings.TrimSuffix(thumbnail, path.Ext(thumbnail)))
+
+	f, err := os.Open(filepath.Join(tempDir, metadataFileName+".info.json"))
 	if err != nil {
 		return err
 	}
