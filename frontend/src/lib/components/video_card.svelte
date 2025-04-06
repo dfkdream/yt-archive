@@ -41,16 +41,16 @@
     </a>
 
     {#if showChannel}
-        <a href={`/channel?id=${video.Owner}`} class="flex items-center">
+        <a href={`/channel?id=${video.Owner.ID}`} class="flex items-center">
             <img
                 loading="lazy"
-                src={`/api/thumbnails/${video.OwnerThumbnail}`}
-                alt={video.Owner}
+                src={`/api/thumbnails/${video.Owner.Thumbnail}`}
+                alt={video.Owner.Title}
                 width="45px"
                 class="rounded-full"
             />
             <span class="text-sm mx-2">
-                {video.Owner}
+                {video.Owner.ID}
                 <br />
                 {video.Timestamp.toLocaleString([], {
                     dateStyle: "medium",

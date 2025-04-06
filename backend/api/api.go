@@ -14,11 +14,11 @@ func New(db *sql.DB, distFS fs.FS) http.Handler {
 
 	r.Path("/api/videos").
 		Methods(http.MethodGet).
-		Handler(videosHandler{DB: db})
+		HandlerFunc(videosHandler)
 
 	r.Path("/api/videos/{id}").
 		Methods(http.MethodGet).
-		Handler(videoHandler{DB: db})
+		HandlerFunc(videoHandler)
 
 	r.PathPrefix("/api/videos/").
 		Methods(http.MethodGet).
@@ -28,11 +28,11 @@ func New(db *sql.DB, distFS fs.FS) http.Handler {
 
 	r.Path("/api/channels").
 		Methods(http.MethodGet).
-		Handler(channelsHandler{DB: db})
+		HandlerFunc(channelsHandler)
 
 	r.Path("/api/channels/{id}").
 		Methods(http.MethodGet).
-		Handler(channelVideosHandler{DB: db})
+		HandlerFunc(channelVideosHandler)
 
 	r.PathPrefix("/api/thumbnails/").
 		Methods(http.MethodGet).
@@ -42,16 +42,16 @@ func New(db *sql.DB, distFS fs.FS) http.Handler {
 
 	r.Path("/api/playlists").
 		Methods(http.MethodGet).
-		Handler(playlistsHandler{DB: db})
+		HandlerFunc(playlistsHandler)
 
 	r.Path("/api/playlists/{id}").
 		Methods(http.MethodGet).
-		Handler(playlistVideosHandler{DB: db})
+		HandlerFunc(playlistVideosHandler)
 
 	r.Path("/api/playlists/{pid}/video/{vid}/index").
 		Methods(http.MethodPost).
 		Headers("Content-Type", "application/json").
-		Handler(playlistVideoIndexHandler{DB: db})
+		HandlerFunc(playlistVideoIndexHandler)
 
 	r.Path("/api/tasks").
 		Methods(http.MethodGet).

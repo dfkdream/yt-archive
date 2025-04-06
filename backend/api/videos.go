@@ -1,59 +1,34 @@
 package api
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"log/slog"
 	"net/http"
-	"time"
+	"yt-archive/db"
 
 	"github.com/gorilla/mux"
 )
 
-type videosHandler struct {
-	DB *sql.DB
-}
-
 type Video struct {
-	ID             string
-	Title          string
-	Description    string
-	Timestamp      time.Time
-	Duration       string
-	Owner          string
-	Thumbnail      string
-	OwnerThumbnail string
+	db.Video
+	Owner db.Channel
 }
 
-func (v videosHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	query := `
-	select videos.id, videos.title, videos.description, timestamp, duration, owner, videos.thumbnail, channels.thumbnail
-	from videos
-	left join channels
-	on videos.owner = channels.id
-	order by videos.rowid desc
-	`
-
-	rows, err := v.DB.Query(query)
+func videosHandler(w http.ResponseWriter, r *http.Request) {
+	rows, err := db.Q().GetVideos(context.Background())
 	if err != nil {
 		slog.Error("videosHandler error", "msg", err)
 		writeError(w, http.StatusInternalServerError)
 		return
 	}
 
-	defer rows.Close()
-
 	result := make([]Video, 0)
-	var video Video
-	for rows.Next() {
-		err = rows.Scan(&video.ID, &video.Title, &video.Description,
-			&video.Timestamp, &video.Duration, &video.Owner, &video.Thumbnail, &video.OwnerThumbnail)
-
-		if err != nil {
-			slog.Error("videosHandler error", "msg", err)
-			writeError(w, http.StatusInternalServerError)
-			return
-		}
+	for _, r := range rows {
+		var video Video
+		video.Video = r.Video
+		video.Owner = r.Channel
 
 		result = append(result, video)
 	}
@@ -61,26 +36,10 @@ func (v videosHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	writeJson(w, result)
 }
 
-type videoHandler struct {
-	DB *sql.DB
-}
-
-func (v videoHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func videoHandler(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 
-	query := `
-	select videos.id, videos.title, videos.description, timestamp, duration, owner, videos.thumbnail, channels.thumbnail
-	from videos
-	left join channels
-	on videos.owner = channels.id
-	where videos.id=?
-	`
-
-	row := v.DB.QueryRow(query, id)
-
-	var video Video
-	err := row.Scan(&video.ID, &video.Title, &video.Description,
-		&video.Timestamp, &video.Duration, &video.Owner, &video.Thumbnail, &video.OwnerThumbnail)
+	row, err := db.Q().GetVideo(context.Background(), id)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -91,6 +50,10 @@ func (v videoHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+
+	var video Video
+	video.Video = row.Video
+	video.Owner = row.Channel
 
 	writeJson(w, video)
 }

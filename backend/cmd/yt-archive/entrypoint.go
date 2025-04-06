@@ -1,14 +1,13 @@
 package main
 
 import (
-	"database/sql"
-	"errors"
 	"io/fs"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
 	"yt-archive/api"
+	"yt-archive/db"
 	"yt-archive/taskq"
 	"yt-archive/tasks"
 
@@ -34,27 +33,7 @@ func init() {
 }
 
 func entrypoint(distFS fs.FS) {
-	err := os.MkdirAll("database", os.FileMode(0o700))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	migrationRequired := true
-	_, err = os.Stat("database/yt-archive.db")
-	if errors.Is(err, os.ErrNotExist) {
-		migrationRequired = false
-	}
-
-	db, err := sql.Open("sqlite3", "file:database/yt-archive.db?_journal_mode=WAL&_txlock=immediate")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	db.SetMaxOpenConns(1)
-
-	migrate(db, migrationRequired)
-
-	q, err := taskq.New(db)
+	q, err := taskq.New(db.DB())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -66,17 +45,17 @@ func entrypoint(distFS fs.FS) {
 
 	taskq.SetDefaultQueue(q)
 
-	archiveVideo, err := tasks.NewArchiveVideoHandler(db)
+	archiveVideo, err := tasks.NewArchiveVideoHandler(db.DB())
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	archivePlaylist, err := tasks.NewArchivePlaylistHandler(db)
+	archivePlaylist, err := tasks.NewArchivePlaylistHandler(db.DB())
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	archiveChannelInfo, err := tasks.NewArchiveChannelInfoHandler(db)
+	archiveChannelInfo, err := tasks.NewArchiveChannelInfoHandler(db.DB())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -88,7 +67,7 @@ func entrypoint(distFS fs.FS) {
 
 	go taskq.Start()
 
-	http.Handle("/", api.New(db, distFS))
+	http.Handle("/", api.New(db.DB(), distFS))
 
 	addr := os.Getenv("YT_ARCHIVE_ADDR")
 	if addr == "" {

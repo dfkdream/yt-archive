@@ -1,4 +1,5 @@
 import { error } from "@sveltejs/kit";
+import type { Channel } from "./channel";
 
 export interface Video {
     ID: string;
@@ -6,9 +7,8 @@ export interface Video {
     Description: string;
     Timestamp: Date;
     Duration: string;
-    Owner: string;
+    Owner: Channel;
     Thumbnail: string;
-    OwnerThumbnail: string;
 }
 
 export async function Videos(f = fetch) {

@@ -1,112 +1,64 @@
 package api
 
 import (
+	"context"
 	"database/sql"
 	"log/slog"
 	"net/http"
+	"yt-archive/db"
 
 	"github.com/gorilla/mux"
 )
 
-type channelsHandler struct {
-	DB *sql.DB
-}
-
-type Channel struct {
-	ID          string
-	Title       string
-	Description string
-	Thumbnail   string
-}
-
-func (c channelsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	rows, err := c.DB.Query("select id, title, description, thumbnail from channels")
+func channelsHandler(w http.ResponseWriter, r *http.Request) {
+	channels, err := db.Q().GetChannels(context.Background())
 	if err != nil {
 		slog.Error("channelsHandler error", "msg", err)
 		writeError(w, http.StatusInternalServerError)
 		return
 	}
 
-	defer rows.Close()
-
-	result := make([]Channel, 0)
-	var channel Channel
-	for rows.Next() {
-		err = rows.Scan(&channel.ID, &channel.Title, &channel.Description, &channel.Thumbnail)
-		if err != nil {
-			slog.Error("channelsHandler error", "msg", err)
-			writeError(w, http.StatusInternalServerError)
-			return
-		}
-
-		result = append(result, channel)
-	}
-
-	writeJson(w, result)
-}
-
-type channelVideosHandler struct {
-	DB *sql.DB
+	writeJson(w, channels)
 }
 
 type ChannelVideos struct {
-	Channel
+	db.Channel
 	Videos []Video
 }
 
-func (c channelVideosHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func channelVideosHandler(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 
-	query := `
-	select c.id, c.title, c.description, c.thumbnail,
-		ifnull(v.id, ""), ifnull(v.title, ""), ifnull(v.description, ""),
-		timestamp, ifnull(duration, ""), ifnull(owner, ""), ifnull(v.thumbnail, "")
-	from channels as c
-	left join videos as v
-	on v.owner = c.id
-	where c.id=?
-	order by v.rowid desc
-	`
+	var channelVideos ChannelVideos
+	channel, err := db.Q().GetChannel(context.Background(), id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			writeError(w, http.StatusNotFound)
+			return
+		}
 
-	rows, err := c.DB.Query(query, id)
+		slog.Error("channelVideosHandler error", "msg", err)
+		writeError(w, http.StatusInternalServerError)
+		return
+	}
+	channelVideos.Channel = channel
+
+	rows, err := db.Q().GetChannelVideos(context.Background(), id)
 	if err != nil {
 		slog.Error("channelVideosHandler error", "msg", err)
 		writeError(w, http.StatusInternalServerError)
 		return
 	}
 
-	defer rows.Close()
-
-	var channelVideos ChannelVideos
-	for rows.Next() {
+	for _, r := range rows {
 		var video Video
-
-		videoTimestamp := sql.NullTime{}
-
-		err = rows.Scan(
-			&channelVideos.ID, &channelVideos.Title, &channelVideos.Description, &channelVideos.Thumbnail,
-			&video.ID, &video.Title, &video.Description, &videoTimestamp, &video.Duration, &video.Owner, &video.Thumbnail,
-		)
-
-		if err != nil {
-			slog.Error("channelVideos error", "msg", err)
-			writeError(w, http.StatusInternalServerError)
-			return
-		}
-
-		if video.ID != "" && videoTimestamp.Valid {
-			video.Timestamp = videoTimestamp.Time
-			video.OwnerThumbnail = channelVideos.ID
-			channelVideos.Videos = append(channelVideos.Videos, video)
-		} else {
-			// No video in this channel
-			channelVideos.Videos = []Video{}
-		}
+		video.Video = r.Video
+		video.Owner = r.Channel
+		channelVideos.Videos = append(channelVideos.Videos, video)
 	}
 
 	if channelVideos.Videos == nil {
-		writeError(w, http.StatusNotFound)
-		return
+		channelVideos.Videos = []Video{}
 	}
 
 	writeJson(w, channelVideos)

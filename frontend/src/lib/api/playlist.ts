@@ -1,3 +1,4 @@
+import type { Channel } from "./channel";
 import { mapTimestamp, type Video } from "./video";
 import { error } from "@sveltejs/kit";
 
@@ -6,10 +7,8 @@ export interface Playlist {
     Title: string;
     Description: string;
     Timestamp: Date;
-    Owner: string;
-    OwnerThumbnail: string;
-    ThumbnailVideo: string;
-    Thumbnail: string;
+    Owner: Channel;
+    ThumbnailVideo: Video;
 }
 
 export async function Playlists(f = fetch) {

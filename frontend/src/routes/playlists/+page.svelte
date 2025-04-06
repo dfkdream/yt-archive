@@ -20,7 +20,7 @@
             <Block strong inset class="!my-1 md:!my-4">
                 <img
                     class="mb-2"
-                    src={`/api/thumbnails/${p.Thumbnail}`}
+                    src={`/api/thumbnails/${p.ThumbnailVideo.Thumbnail}`}
                     alt={p.Title}
                 />
 
@@ -33,13 +33,13 @@
                 <a href={`/channel?id=${p.Owner}`} class="flex items-center">
                     <img
                         loading="lazy"
-                        src={`/api/thumbnails/${p.OwnerThumbnail}`}
-                        alt={p.Owner}
+                        src={`/api/thumbnails/${p.Owner.Thumbnail}`}
+                        alt={p.Owner.Title}
                         width="45px"
                         class="rounded-full"
                     />
                     <span class="text-sm mx-2">
-                        {p.Owner}
+                        {p.Owner.ID}
                         <br />
                         {p.Timestamp.toLocaleString([], {
                             dateStyle: "medium",

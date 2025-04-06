@@ -68,16 +68,19 @@
             class="font-sans overflow-y-scroll">{playlistVideos.Description.trim()}</pre>
         <br />
     {/if}
-    <a href={`/channel?id=${playlistVideos.Owner}`} class="flex items-center">
+    <a
+        href={`/channel?id=${playlistVideos.Owner.ID}`}
+        class="flex items-center"
+    >
         <img
             loading="lazy"
-            src={`/api/thumbnails/${playlistVideos.OwnerThumbnail}`}
-            alt={playlistVideos.Owner}
+            src={`/api/thumbnails/${playlistVideos.Owner.Thumbnail}`}
+            alt={playlistVideos.Owner.Title}
             width="45px"
             class="rounded-full"
         />
         <span class="text-sm mx-2">
-            {playlistVideos.Owner}
+            {playlistVideos.Owner.ID}
             <br />
             {playlistVideos.Timestamp.toLocaleString([], {
                 dateStyle: "medium",
