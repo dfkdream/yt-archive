@@ -18,7 +18,7 @@
         <a {href}>
             <div class="relative">
                 <img
-                    class="mb-2"
+                    class="mb-2 aspect-video bg-gray-50"
                     loading="lazy"
                     src={`/api/thumbnails/${video.Thumbnail}`}
                     alt={video.Title}
