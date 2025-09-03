@@ -24,7 +24,11 @@ RUN --mount=type=cache,target=/go/pkg/mod \
 
 FROM alpine
 
-RUN apk update && apk add yt-dlp ffmpeg
+RUN apk update && apk add python3 ffmpeg
+
+ADD https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp /bin/yt-dlp
+
+RUN chmod a+rx /bin/yt-dlp
 
 WORKDIR /yt-archive
 
