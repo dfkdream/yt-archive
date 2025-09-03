@@ -30,7 +30,7 @@
                     {p.Title}
                 </h2>
 
-                <a href={`/channel?id=${p.Owner}`} class="flex items-center">
+                <a href={`/channel?id=${p.Owner.ID}`} class="flex items-center">
                     <img
                         loading="lazy"
                         src={`/api/thumbnails/${p.Owner.Thumbnail}`}
